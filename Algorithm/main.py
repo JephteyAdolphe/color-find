@@ -20,7 +20,7 @@ class Algorithm:
     # initializes class attributes / paths
     def __init__(self, path: str) -> None:
         try:
-            self.__picPath, self.__img = path, Image.open(path)
+            self.__img = Image.open(path)
             self.__grayscaleImage = None
             self.__grayscalePath = "grayscale " + path
         except FileNotFoundError:
@@ -37,14 +37,14 @@ class Algorithm:
     def convertToBinary(self):
         pass
 
-    def displayOriginalImage(self) -> None:
+    def showImage(self) -> None:
         try:
             plt.imshow(self.__img)
             plt.show()
         except TypeError:
             print("No image to display")
 
-    def displayEditedImage(self) -> None:
+    def showEditedImage(self) -> None:
         # displays edited image if one has already been created
         try:
             # self.convertToGrayscale()   # creates modifiable image if it doesn't already exist
@@ -55,7 +55,7 @@ class Algorithm:
 
     # def getOriginalObject(self) -> object:
     #     return self.__img
-    # 
+    #
     # def getEditedObject(self) -> object:
     #     return self.__grayscaleImage
 
@@ -63,34 +63,34 @@ class Algorithm:
         pass
 
     # returns 2D array where each rgb pixel is represented by a string
-    def getOriginalRGB(self) -> list:
+    def getRGB(self) -> list:
         if self.__img:  # checks for valid image
-            rgbArr = []
-            numArr = np.array(self.__img)   # convert imgage object to numpy array
-
-            for i in range(self.getOriginalDimensions()[0]):
-                rgbArr.append([])
-                for j in range(self.getOriginalDimensions()[1]):
-
-                    pixel = np.array(numArr[i][j]).tolist()
-                    for k in range(len(pixel)):
-                        pixel[k] = str(pixel[k])
-                    pixelString = ','.join(pixel)
-
-                    rgbArr[i].append(pixelString)
-            return rgbArr
+            return self.__rgb(self.__img, self.getDimensions()[0], self.getDimensions()[1])
         else:
             print("Image does not exist")
 
     # returns 2D array where each rgb pixel is represented by a string
-    def getEditedRGB(self) -> np.ndarray:
-        if self.__grayscaleImage:
-            return np.array(self.__grayscaleImage)
+    def getEditedRGB(self) -> list:
+        if self.__grayscaleImage:   # checks for valid image
+            return self.__rgb(self.__grayscaleImage, self.getEditedDimensions()[0], self.getEditedDimensions()[1])
         else:
             # self.convertToGrayscale()   # creates modifiable image if it doesn't already exist
             print("Edited image does not exist")
 
-    def getOriginalDimensions(self) -> tuple:
+    # RGB string array helper function
+    def __rgb(self, image, x: int, y: int) -> list:
+        rgbArr = []
+        numArr = np.array(image)  # converts image object to numpy array
+
+        for i in range(x):
+            rgbArr.append([])
+            for j in range(y):
+                # iterates through pixel list and makes each value a string
+                pixel = [str(rgb) for rgb in np.array(numArr[i][j]).tolist()]
+                rgbArr[i].append(','.join(pixel))
+        return rgbArr
+
+    def getDimensions(self) -> tuple:
         if self.__img:
             return np.array(self.__img).shape
         else:
@@ -104,7 +104,7 @@ class Algorithm:
             print("Edited image does not exist")
 
     # so far only displays outer edge
-    def displayOutline(self):
+    def showOutline(self):
         edge = self.__img.filter(ImageFilter.FIND_EDGES)
         plt.imshow(edge)
         plt.show()
@@ -119,13 +119,4 @@ class Algorithm:
 
 
 test = Algorithm("dog.png")
-print(test.getOriginalRGB())
-
-# if not os.path.isfile("test.txt"):
-#     compressedArr = test.get_original_num_array()[:, :, 0]
-#     np.savetxt("test.txt", compressedArr, fmt="%d", delimiter=",")
-
-# look at text file
-# compressedArr = test.get_original_num_array()[:, :, 0]
-# plt.imshow(compressedArr)
-# plt.show()
+print(test.getRGB())
