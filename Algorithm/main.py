@@ -3,17 +3,6 @@ import matplotlib.pyplot as plt
 import os
 from PIL import Image, ImageFilter
 
-"""
-- Maybe export num array to csv file when finished?
-
-- backtracking algo to find dead end
-
-- Need to compress the 3D array for that ^^^
-
-- Resize picture in app framework since screen size of phone / tablet will
-vary (find way to get screen size in app in order to accurately resize picture)?
-"""
-
 
 class Algorithm:
 
@@ -21,11 +10,12 @@ class Algorithm:
     def __init__(self, path: str) -> None:
         try:
             self.__img = Image.open(path)
+            self.__path = path
             if self.getDimensions()[0] > 1200 and self.getDimensions()[1] > 1200:
-                self.resize()
+                self.__resize()
 
             self.idColorMap = None
-            self.idArr = self.getIDArray()
+            self.idArr = self.__getIDArray()
             self.__grayscaleImage = None
             self.__grayscalePath = "grayscale " + path
 
@@ -43,9 +33,6 @@ class Algorithm:
 
             self.__grayscaleImage.save(self.__grayscalePath)
 
-    def convertToBinary(self) -> None:
-        pass
-
     def showImage(self) -> None:
         try:
             plt.imshow(self.__img)
@@ -62,7 +49,7 @@ class Algorithm:
         except TypeError:
             print("No image to display")
 
-    def resize(self) -> None:
+    def __resize(self) -> None:
         self.__img = self.__img.resize((600, 600))
 
     # returns 2D array where each rgb pixel is represented by a string
@@ -94,7 +81,7 @@ class Algorithm:
         return rgbArr
 
     # return color ID array
-    def getIDArray(self) -> list:
+    def __getIDArray(self) -> list:
         if self.__img:  # checks for valid image
             return self.__getID(self.__img, self.getDimensions()[0], self.getDimensions()[1])
         else:
@@ -176,11 +163,12 @@ class Algorithm:
         except FileNotFoundError:
             print(f"Could not find the file {self.__grayscalePath} to delete")
 
-    def saveToTxt(self):
-        # np.savetxt("foo.txt", np.array(self.idToRGB()), fmt="%d", delimiter=",")
-        pass
+    def saveToTxt(self) -> None:
+        txtFile = self.__path.split(".")[0] + ".txt"
+        np.savetxt(txtFile, np.array(self.idToRGB()), fmt="%d", delimiter=",")
 
-    def idToRGB(self):
+    # convert id array back to image object readable by pillow
+    def idToRGB(self) -> np.ndarray:
         convertedID = []
         idArr = self.getIDArray()
         for i in range(len(idArr)):
@@ -189,15 +177,13 @@ class Algorithm:
                 convertedID[i].append(self.idColorMap[idArr[i][j]])
         return np.array(convertedID)
 
-    def getRGBArray(self):
-        return np.array(self.__img)
-
-    def getColorMap(self):
+    # returns color has map with color ID and their corresponding pixel(rgb) list
+    def getColorMap(self) -> dict:
         return self.idColorMap
 
 
 ball = Algorithm("dog.png")
-print(ball.idColorMap)
+# print(ball.saveToTxt())
 # imageIdToRGB = ball.idToRGB()
 # plt.imshow(imageIdToRGB)
 # plt.show()
