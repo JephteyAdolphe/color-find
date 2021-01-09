@@ -21,8 +21,14 @@ class Algorithm:
     def __init__(self, path: str) -> None:
         try:
             self.__img = Image.open(path)
+            if self.getDimensions()[0] > 1200 and self.getDimensions()[1] > 1200:
+                self.resize()
+
+            self.idColorMap = None
+            self.idArr = self.getIDArray()
             self.__grayscaleImage = None
             self.__grayscalePath = "grayscale " + path
+
         except FileNotFoundError:
             self.__img = self.__grayscaleImage = None
             print("File not found")
@@ -37,7 +43,7 @@ class Algorithm:
 
             self.__grayscaleImage.save(self.__grayscalePath)
 
-    def convertToBinary(self):
+    def convertToBinary(self) -> None:
         pass
 
     def showImage(self) -> None:
@@ -56,8 +62,8 @@ class Algorithm:
         except TypeError:
             print("No image to display")
 
-    def resize(self, width: float, height: float) -> None:
-        pass
+    def resize(self) -> None:
+        self.__img = self.__img.resize((600, 600))
 
     # returns 2D array where each rgb pixel is represented by a string
     def getRGB(self) -> list:
@@ -127,7 +133,8 @@ class Algorithm:
                 else:
                     idMap[0] = pixel
                     idArr[i].append(0)
-        
+
+        self.idColorMap = idMap
         return idArr
 
     # gets ID for visited pixel
@@ -136,7 +143,7 @@ class Algorithm:
             matches = 0
             for i in range(len(pixelToCheck)):
                 # checks to see if any rgb value pairs differ by 20 or more
-                if abs(pixelToCheck[i] - idMap[colorID][i]) < 20:
+                if abs(pixelToCheck[i] - idMap[colorID][i]) < 60:
                     matches += 1
             if matches == len(pixelToCheck):
                 return colorID
@@ -156,7 +163,7 @@ class Algorithm:
             print("Edited image does not exist")
 
     # so far only displays outer edge
-    def showOutline(self):
+    def showOutline(self) -> None:
         edge = self.__img.filter(ImageFilter.FIND_EDGES)
         plt.imshow(edge)
         plt.show()
@@ -169,6 +176,28 @@ class Algorithm:
         except FileNotFoundError:
             print(f"Could not find the file {self.__grayscalePath} to delete")
 
+    def saveToTxt(self):
+        # np.savetxt("foo.txt", np.array(self.idToRGB()), fmt="%d", delimiter=",")
+        pass
 
-test = Algorithm("ball.jpg")
-test.showImage()
+    def idToRGB(self):
+        convertedID = []
+        idArr = self.getIDArray()
+        for i in range(len(idArr)):
+            convertedID.append([])
+            for j in range(len(idArr[i])):
+                convertedID[i].append(self.idColorMap[idArr[i][j]])
+        return np.array(convertedID)
+
+    def getRGBArray(self):
+        return np.array(self.__img)
+
+    def getColorMap(self):
+        return self.idColorMap
+
+
+ball = Algorithm("dog.png")
+print(ball.idColorMap)
+# imageIdToRGB = ball.idToRGB()
+# plt.imshow(imageIdToRGB)
+# plt.show()
