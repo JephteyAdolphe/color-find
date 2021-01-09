@@ -165,7 +165,8 @@ class Algorithm:
 
     def saveToTxt(self) -> None:
         txtFile = self.__path.split(".")[0] + ".txt"
-        np.savetxt(txtFile, np.array(self.idToRGB()), fmt="%d", delimiter=",")
+        if not os.path.isfile(txtFile):
+            np.savetxt(txtFile, np.array(self.idToRGB()), fmt="%d", delimiter=",")
 
     # convert id array back to image object readable by pillow
     def idToRGB(self) -> np.ndarray:
