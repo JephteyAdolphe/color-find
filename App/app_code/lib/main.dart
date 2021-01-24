@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
         // Body contains a list(children) of widgets which are the drawing canvas and color pallette, in that order
         body: Column(
           children: <Widget>[
-            DrawingBlock(),
+            DrawingBlock(), // Need to make height/width of this dynamic so it fits to different screen sizes
             ColorPalette(),
           ],
         ));
