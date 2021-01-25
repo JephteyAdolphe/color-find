@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+// Maybe find a way to import widgets from a separare file so that theres not too much code in this main one
+
 void main() {
   runApp(MyApp());
 }
