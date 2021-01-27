@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hello_world/palette.dart';
+import 'menu.dart';
+import 'canvas.dart';
 
-// Maybe find a way to import widgets from a separare file so that theres not too much code in this main one
+// Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
 void main() {
   runApp(MyApp());
@@ -33,18 +36,19 @@ class HomePage extends StatelessWidget {
         ),
 
         // drawer is a hamburger menu and TabList is the list of items (of type Drawer) that we create
-        drawer: TabList(),
+        drawer: getMenu(context),
 
         // Body contains a list(children) of widgets which are the drawing canvas and color pallette, in that order
         body: Column(
           children: <Widget>[
-            DrawingBlock(), // Need to make height/width of this dynamic so it fits to different screen sizes
-            ColorPalette(),
+            getCanvas(context),
+            getPalette(context),
           ],
         ));
   }
 }
 
+/*
 // Drawing block is where the coloring takes place
 class DrawingBlock extends StatelessWidget {
   @override
@@ -158,6 +162,7 @@ class ColorPalette extends StatelessWidget {
   }
 }
 
+
 // Hamburger Menu where we list our action buttons
 class TabList extends StatelessWidget {
   @override
@@ -247,3 +252,4 @@ class MyPainter extends CustomPainter {
     return false;
   }
 }
+*/
