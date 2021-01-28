@@ -37,6 +37,7 @@ class HomePage extends StatelessWidget {
 
         // drawer is a hamburger menu and TabList is the list of items (of type Drawer) that we create
         drawer: getMenu(context),
+        // backgroundColor: Colors.red,
 
         // Body contains a list(children) of widgets which are the drawing canvas and color pallette, in that order
         body: Column(

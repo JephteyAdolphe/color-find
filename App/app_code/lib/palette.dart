@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+// Make color options circulars?
+
 // Scrollable color pallette
 
 Widget getPalette(BuildContext context) {
   return Container(
       height: 60,
-      // padding: EdgeInsets.all(5),
+      padding: EdgeInsets.only(top: 5),
 
       // color buttons wrapped in listview so that we can scroll through them
       child: ListView(
