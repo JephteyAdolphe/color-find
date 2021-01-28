@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:hello_world/palette.dart';
@@ -23,6 +25,8 @@ class MyApp extends StatelessWidget {
 
         // Home Page contains everything in it (side menu, canvas, colors)
         home: HomePage());
+
+    // If homepage is replaced with drawingblock then drawing works
   }
 }
 
@@ -42,215 +46,84 @@ class HomePage extends StatelessWidget {
         // Body contains a list(children) of widgets which are the drawing canvas and color pallette, in that order
         body: Column(
           children: <Widget>[
-            getCanvas(context),
+            DrawingBlock(),
             getPalette(context),
           ],
         ));
   }
 }
 
-/*
-// Drawing block is where the coloring takes place
-class DrawingBlock extends StatelessWidget {
+class DrawingBlock extends StatefulWidget {
+  @override
+  _DrawingBlockState createState() => _DrawingBlockState();
+}
+
+/* Find a way to export this stateful widget to the main file
+ This stateful widget allows for user finger detection (drawing)
+ Copied from canvas.dart
+*/
+
+class _DrawingBlockState extends State<DrawingBlock> {
+  List<Offset> points = [];
+
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 650,
-        decoration: BoxDecoration(
-            border: Border.all(width: 8),
-            borderRadius: BorderRadius.circular(12)),
-
-        // Color block is wrapped in a Container then scaffold to control the size of colors and scrolling ability
-        child: Scaffold(
-          body: ColorBlock(),
-        ));
-  }
-}
-
-// Scrollable color pallette
-class ColorPalette extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        height: 60,
-
-        // color buttons wrapped in listview so that we can scroll through them
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.red;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.orange;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.yellow;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.green;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.blue;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.indigo;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.purple;
-                }))),
-            ElevatedButton(
-                onPressed: null,
-                child: null,
-                style: ButtonStyle(backgroundColor:
-                    MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.pressed))
-                    return Colors.blue;
-                  return Colors.pink;
-                }))),
-          ],
-        ));
-  }
-}
-
-
-// Hamburger Menu where we list our action buttons
-class TabList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          Container(
-            height: 120,
-            child: DrawerHeader(
-              child: Text('Menu'),
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
+      height: 650, // Make height dynamic instead of fixed
+      child: GestureDetector(
+          onPanDown: (details) {
+            this.setState(() {
+              points.add(details.localPosition);
+            });
+          },
+          onPanUpdate: (details) {
+            this.setState(() {
+              points.add(details.localPosition);
+            });
+          },
+          onPanEnd: (details) {
+            this.setState(() {
+              points.add(null);
+            });
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            child: CustomPaint(
+              painter: MyPainter(points: points),
             ),
-          ),
-          ListTile(
-            title: Text('New Image'),
-            onTap: () {
-              // Go to page
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Restart'),
-            onTap: () {
-              // Go to page
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Save'),
-            onTap: () {
-              // Go to page
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Show Outline'),
-            onTap: () {
-              // Go to page
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text('Show Original'),
-            onTap: () {
-              // Go to page
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ColorBlock extends StatelessWidget {
-  // Reuse this base widget on every page
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: MyPainter(),
-      child: Container(),
-      // size: Size(500, 300),
+          )),
     );
   }
 }
 
 class MyPainter extends CustomPainter {
+  List<Offset> points;
+
+  MyPainter({this.points});
+
   @override
   void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.teal
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
+    Paint background = Paint()..color = Colors.white;
+    Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.drawRect(rect, background);
 
-    Offset start = Offset(0, size.height / 2);
-    Offset end = Offset(size.width, size.height / 2);
+    Paint paint = Paint();
+    paint.color = Colors.black;
+    paint.strokeWidth = 2.0;
+    paint.isAntiAlias = true;
+    paint.strokeCap = StrokeCap.round;
 
-    canvas.drawLine(start, end, paint);
+    for (int x = 0; x < points.length - 1; x++) {
+      if (points[x] != null && points[x + 1] != null) {
+        canvas.drawLine(points[x], points[x + 1], paint);
+      } else if (points[x] != null && points[x + 1] == null) {
+        canvas.drawPoints(PointMode.points, [points[x]], paint);
+      }
+    }
   }
 
   @override
   bool shouldRepaint(CustomPainter old) {
-    return false;
+    return true;
   }
 }
-*/
