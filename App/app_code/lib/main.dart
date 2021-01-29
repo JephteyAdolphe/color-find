@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:hello_world/palette.dart';
+import 'package:app_code/palette.dart';
 import 'menu.dart';
 import 'canvas.dart';
 
