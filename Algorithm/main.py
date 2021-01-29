@@ -7,11 +7,12 @@ from PIL import Image, ImageFilter
 class Algorithm:
 
     # initializes class variables / paths
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, id: int) -> None:
         try:
             self.__img = Image.open(path)
             self.__path = path
-            if self.getDimensions()[0] > 1200 and self.getDimensions()[1] > 1200:
+            self.__id = id
+            if self.getDimensions()[0] > 100 and self.getDimensions()[1] > 100:
                 self.__resize()
 
             self.idColorMap = None
@@ -50,7 +51,7 @@ class Algorithm:
             print("No image to display")
 
     def __resize(self) -> None:
-        self.__img = self.__img.resize((600, 600))
+        self.__img = self.__img.resize((100, 100))
 
     # returns 2D array where each rgb pixel is represented by a string
     def getRGB(self) -> list:
@@ -163,15 +164,34 @@ class Algorithm:
         except FileNotFoundError:
             print(f"Could not find the file {self.__grayscalePath} to delete")
 
-    def saveToTxt(self) -> None:
-        txtFile = self.__path.split(".")[0] + ".txt"
+    def export(self) -> None:
+        self.saveidArrTxt()
+        self.saveidColorMapTxt()
+        self.saveNumLayerTxt()
+
+    def saveidArrTxt(self) -> None:
+        txtFile = self.__path.split(".")[0] + "." + str(self.__id) + ".layerMatrix.txt"
         if not os.path.isfile(txtFile):
-            np.savetxt(txtFile, np.array(self.idToRGB()), fmt="%d", delimiter=",")
+            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
+
+    def saveidColorMapTxt(self) -> None:
+        txtFile = self.__path.split(".")[0] + "." + str(self.__id) + ".colorMap.txt"
+        if not os.path.isfile(txtFile):
+            for target, values in self.idColorMap.items():
+                a = np.array(values)
+                with open(txtFile, "ab") as appen:
+                    np.savetxt(appen, a.reshape(1,a.shape[0]), fmt="%d", delimiter=",")
+
+    def saveNumLayerTxt(self) -> None:
+        txtFile = self.__path.split(".")[0] + "." + str(self.__id) + ".numLayer.txt"
+        if not os.path.isfile(txtFile):
+            with open(txtFile, "w") as appen:
+                appen.write(str(len(self.idColorMap)))
 
     # convert id array back to image object readable by pillow
     def idToRGB(self) -> np.ndarray:
         convertedID = []
-        idArr = self.getIDArray()
+        idArr = self.__getIDArray()
         for i in range(len(idArr)):
             convertedID.append([])
             for j in range(len(idArr[i])):
@@ -183,8 +203,12 @@ class Algorithm:
         return self.idColorMap
 
 
-ball = Algorithm("dog.png")
-# print(ball.saveToTxt())
+ball = Algorithm("ball.jpg",1)
+# ball.saveToTxt()
+ball.export()
 # imageIdToRGB = ball.idToRGB()
 # plt.imshow(imageIdToRGB)
 # plt.show()
+
+dog = Algorithm("dog.png",2)
+dog.export()
