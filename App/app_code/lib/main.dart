@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:hello_world/palette.dart';
+import 'package:app_code/palette.dart';
 import 'menu.dart';
 import 'canvas.dart';
 
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         ),
 
         // Home Page contains everything in it (side menu, canvas, colors)
-        home: HomePage());
+        home: DrawingBlock());
 
     // If homepage is replaced with drawingblock then drawing works
   }
@@ -68,30 +68,53 @@ class _DrawingBlockState extends State<DrawingBlock> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 650, // Make height dynamic instead of fixed
-      child: GestureDetector(
-          onPanDown: (details) {
-            this.setState(() {
-              points.add(details.localPosition);
-            });
-          },
-          onPanUpdate: (details) {
-            this.setState(() {
-              points.add(details.localPosition);
-            });
-          },
-          onPanEnd: (details) {
-            this.setState(() {
-              points.add(null);
-            });
-          },
-          child: ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-            child: CustomPaint(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Test2'),
+      ),
+      body: GestureDetector(
+        onPanDown: (details) {
+          this.setState(() {
+            points.add(details.localPosition);
+          });
+        },
+        onPanUpdate: (details) {
+          this.setState(() {
+            points.add(details.localPosition);
+          });
+        },
+        onPanEnd: (details) {
+          this.setState(() {
+            points.add(null);
+          });
+        },
+        child: Stack(
+          children: <Widget>[
+            //borderRadius: BorderRadius.all(Radius.circular(20)),
+            CustomPaint(
               painter: MyPainter(points: points),
             ),
-          )),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                              color: const Color(0xffffff).withOpacity(0)
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: getPalette(context),
     );
   }
 }
