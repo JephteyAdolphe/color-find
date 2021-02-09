@@ -6,6 +6,9 @@ import 'package:app_code/palette.dart';
 import 'menu.dart';
 import 'canvas.dart';
 
+Color activeColor = Colors.black26;
+List<ColorRecord> points = [];
+int selectedLayer = -1;
 // Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
 void main() {
@@ -30,27 +33,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Color Find"),
-          centerTitle: true,
-        ),
+class ColorRecord {
+  Offset point;
+  Paint colorRecord;
 
-        // drawer is a hamburger menu and TabList is the list of items (of type Drawer) that we create
-        drawer: getMenu(context),
-        // backgroundColor: Colors.red,
-
-        // Body contains a list(children) of widgets which are the drawing canvas and color pallette, in that order
-        body: Column(
-          children: <Widget>[
-            DrawingBlock(),
-            getPalette(context),
-          ],
-        ));
-  }
+  ColorRecord({this.point, this.colorRecord});
 }
 
 class DrawingBlock extends StatefulWidget {
@@ -64,27 +51,70 @@ class DrawingBlock extends StatefulWidget {
 */
 
 class _DrawingBlockState extends State<DrawingBlock> {
-  List<Offset> points = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Test2'),
       ),
+      //drawer: getMenu(context),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('Blue'),
+              onTap: () {
+                activeColor = Colors.blue;
+              },
+            ),
+            ListTile(
+              title: Text('Black'),
+              onTap: () {
+                activeColor = Colors.black;
+              },
+            ),
+            ListTile(
+              title: Text('Red'),
+              onTap: () {
+                activeColor = Colors.red;
+              },
+            ),
+            ListTile(
+              title: Text('White'),
+              onTap: () {
+                activeColor = Colors.white;
+              },
+            ),
+          ],
+        ),
+      ),
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
-            points.add(details.localPosition);
+            selectedLayer = 1; // where select a layer
+            points.add(ColorRecord(
+                // [1 , 2 ; 1 , 0]
+                point: details.localPosition,
+                colorRecord: Paint()
+                  ..color = activeColor
+                  ..strokeWidth = 2
+                  ..strokeCap = StrokeCap.round));
           });
         },
         onPanUpdate: (details) {
           this.setState(() {
-            points.add(details.localPosition);
+            if (selectedLayer == 1)
+              points.add(ColorRecord(
+                  point: details.localPosition,
+                  colorRecord: Paint()
+                    ..color = activeColor
+                    ..strokeWidth = 2
+                    ..strokeCap = StrokeCap.round));
           });
         },
         onPanEnd: (details) {
           this.setState(() {
+            selectedLayer = -1; // where deselect a layer
             points.add(null);
           });
         },
@@ -92,7 +122,9 @@ class _DrawingBlockState extends State<DrawingBlock> {
           children: <Widget>[
             //borderRadius: BorderRadius.all(Radius.circular(20)),
             CustomPaint(
-              painter: MyPainter(points: points),
+              painter: MyPainter(
+                points: points,
+              ),
             ),
             Expanded(
               child: Row(
@@ -102,8 +134,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                       children: [
                         Expanded(
                           child: Container(
-                              color: const Color(0xffffff).withOpacity(0)
-                          ),
+                              color: const Color(0xffffff).withOpacity(0)),
                         ),
                       ],
                     ),
@@ -120,7 +151,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
 }
 
 class MyPainter extends CustomPainter {
-  List<Offset> points;
+  List<ColorRecord> points;
 
   MyPainter({this.points});
 
@@ -130,17 +161,13 @@ class MyPainter extends CustomPainter {
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRect(rect, background);
 
-    Paint paint = Paint();
-    paint.color = Colors.black;
-    paint.strokeWidth = 2.0;
-    paint.isAntiAlias = true;
-    paint.strokeCap = StrokeCap.round;
-
     for (int x = 0; x < points.length - 1; x++) {
       if (points[x] != null && points[x + 1] != null) {
-        canvas.drawLine(points[x], points[x + 1], paint);
+        Paint paint = points[x].colorRecord;
+        canvas.drawLine(points[x].point, points[x + 1].point, paint);
       } else if (points[x] != null && points[x + 1] == null) {
-        canvas.drawPoints(PointMode.points, [points[x]], paint);
+        Paint paint = points[x].colorRecord;
+        canvas.drawPoints(PointMode.points, [points[x].point], paint);
       }
     }
   }
@@ -149,4 +176,97 @@ class MyPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter old) {
     return true;
   }
+}
+
+Widget getPalette(BuildContext context) {
+  return Container(
+      height: 60,
+      padding: EdgeInsets.only(top: 5),
+
+      // color buttons wrapped in listview so that we can scroll through them
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.red;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.red;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.orange;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.orange;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.yellow;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.yellow;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.green;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.green;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.blue;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.blue;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.indigo;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.indigo;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.purple;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.purple;
+              }))),
+          ElevatedButton(
+              onPressed: () {
+                activeColor = Colors.pink;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+                  MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                return Colors.pink;
+              }))),
+        ],
+      ));
 }
