@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:app_code/palette.dart';
@@ -55,39 +56,43 @@ class _DrawingBlockState extends State<DrawingBlock> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Test2'),
+        title: Text("Color Find"),
+        centerTitle: true,
+
+        // Canvas reset button (should maybe add undo (can implement a stack) button as well)
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.delete),
+              tooltip: 'Reset Canvas',
+              onPressed: () {
+                /*showDialog(
+                  context: context,
+                  builder: (_) => CupertinoAlertDialog(
+                    title: Text('Reset Canvas?'),
+                    actions: [
+                      TextButton(
+                        child: Text('No'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text('Yes'),
+                        onPressed: () {
+                          points.clear();
+                          Navigator.pop(context);
+                          // Screen doesn't actually clear until another draw is attempted
+                        },
+                      ),
+                    ],
+                  ),
+                  barrierDismissible: true,
+                );*/
+                points.clear();
+              })
+        ],
       ),
-      //drawer: getMenu(context),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            ListTile(
-              title: Text('Blue'),
-              onTap: () {
-                activeColor = Colors.blue;
-              },
-            ),
-            ListTile(
-              title: Text('Black'),
-              onTap: () {
-                activeColor = Colors.black;
-              },
-            ),
-            ListTile(
-              title: Text('Red'),
-              onTap: () {
-                activeColor = Colors.red;
-              },
-            ),
-            ListTile(
-              title: Text('White'),
-              onTap: () {
-                activeColor = Colors.white;
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: getMenu(context),
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
@@ -152,7 +157,6 @@ class _DrawingBlockState extends State<DrawingBlock> {
 
 class MyPainter extends CustomPainter {
   List<ColorRecord> points;
-
   MyPainter({this.points});
 
   @override
