@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'globals.dart' as globals;
 
 // Hamburger Menu where we list our action buttons
 
@@ -35,6 +36,7 @@ Widget getMenu(BuildContext context) {
           title: Text('Save'),
           onTap: () {
             // Go to page
+            globals.records.clear();
             Navigator.pop(context);
           },
         ),

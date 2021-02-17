@@ -1,14 +1,13 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:app_code/palette.dart';
 import 'menu.dart';
 import 'canvas.dart';
+import 'globals.dart' as globals;
 
-Color activeColor = Colors.black26;
-List<ColorRecord> points = [];
+
 int selectedLayer = -1;
 // Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
@@ -34,12 +33,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ColorRecord {
-  Offset point;
-  Paint colorRecord;
 
-  ColorRecord({this.point, this.colorRecord});
-}
 
 class DrawingBlock extends StatefulWidget {
   @override
@@ -56,52 +50,50 @@ class _DrawingBlockState extends State<DrawingBlock> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Color Find"),
-        centerTitle: true,
-
-        // Canvas reset button (should maybe add undo (can implement a stack) button as well)
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.delete),
-              tooltip: 'Reset Canvas',
-              onPressed: () {
-                /*showDialog(
-                  context: context,
-                  builder: (_) => CupertinoAlertDialog(
-                    title: Text('Reset Canvas?'),
-                    actions: [
-                      TextButton(
-                        child: Text('No'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: Text('Yes'),
-                        onPressed: () {
-                          points.clear();
-                          Navigator.pop(context);
-                          // Screen doesn't actually clear until another draw is attempted
-                        },
-                      ),
-                    ],
-                  ),
-                  barrierDismissible: true,
-                );*/
-                points.clear();
-              })
-        ],
+        title: Text('Test2'),
       ),
       drawer: getMenu(context),
+        /*
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('Blue'),
+              onTap: () {
+                activeColor = Colors.blue;
+              },
+            ),
+            ListTile(
+              title: Text('Black'),
+              onTap: () {
+                activeColor = Colors.black;
+              },
+            ),
+            ListTile(
+              title: Text('Red'),
+              onTap: () {
+                activeColor = Colors.red;
+              },
+            ),
+            ListTile(
+              title: Text('White'),
+              onTap: () {
+                activeColor = Colors.white;
+              },
+            ),
+          ],
+        ),
+      ),
+      */
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
             selectedLayer = 1; // where select a layer
-            points.add(ColorRecord(
+            globals.records.add(globals.ColorRecord(
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
                 colorRecord: Paint()
-                  ..color = activeColor
+                  ..color = globals.activeColor
                   ..strokeWidth = 2
                   ..strokeCap = StrokeCap.round));
           });
@@ -109,10 +101,10 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanUpdate: (details) {
           this.setState(() {
             if (selectedLayer == 1)
-              points.add(ColorRecord(
+              globals.records.add(globals.ColorRecord(
                   point: details.localPosition,
                   colorRecord: Paint()
-                    ..color = activeColor
+                    ..color = globals.activeColor
                     ..strokeWidth = 2
                     ..strokeCap = StrokeCap.round));
           });
@@ -120,7 +112,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanEnd: (details) {
           this.setState(() {
             selectedLayer = -1; // where deselect a layer
-            points.add(null);
+            globals.records.add(null);
           });
         },
         child: Stack(
@@ -128,7 +120,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
             //borderRadius: BorderRadius.all(Radius.circular(20)),
             CustomPaint(
               painter: MyPainter(
-                points: points,
+                points: globals.records,
               ),
             ),
             Expanded(
@@ -156,7 +148,8 @@ class _DrawingBlockState extends State<DrawingBlock> {
 }
 
 class MyPainter extends CustomPainter {
-  List<ColorRecord> points;
+  List<globals.ColorRecord> points;
+
   MyPainter({this.points});
 
   @override
@@ -182,95 +175,3 @@ class MyPainter extends CustomPainter {
   }
 }
 
-Widget getPalette(BuildContext context) {
-  return Container(
-      height: 60,
-      padding: EdgeInsets.only(top: 5),
-
-      // color buttons wrapped in listview so that we can scroll through them
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        children: <Widget>[
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.red;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.red;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.orange;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.orange;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.yellow;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.yellow;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.green;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.green;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.blue;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.blue;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.indigo;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.indigo;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.purple;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.purple;
-              }))),
-          ElevatedButton(
-              onPressed: () {
-                activeColor = Colors.pink;
-              },
-              child: null,
-              style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) {
-                return Colors.pink;
-              }))),
-        ],
-      ));
-}

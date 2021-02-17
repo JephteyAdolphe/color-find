@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'globals.dart' as globals;
 
 // Make color options circulars?
 
 // Scrollable color pallette
+
+
 
 Widget getPalette(BuildContext context) {
   return Container(
@@ -15,77 +18,85 @@ Widget getPalette(BuildContext context) {
         scrollDirection: Axis.horizontal,
         children: <Widget>[
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.red;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.red;
-              }))),
+                    return Colors.red;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.orange;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.orange;
-              }))),
+                    return Colors.orange;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.yellow;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.yellow;
-              }))),
+                    return Colors.yellow;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.green;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.green;
-              }))),
+                    return Colors.green;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.blue;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.blue;
-              }))),
+                    return Colors.blue;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.indigo;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.indigo;
-              }))),
+                    return Colors.indigo;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.purple;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.purple;
-              }))),
+                    return Colors.purple;
+                  }))),
           ElevatedButton(
-              onPressed: null,
+              onPressed: () {
+                globals.activeColor = Colors.pink;
+              },
               child: null,
               style: ButtonStyle(backgroundColor:
-                  MaterialStateProperty.resolveWith<Color>(
+              MaterialStateProperty.resolveWith<Color>(
                       (Set<MaterialState> states) {
-                if (states.contains(MaterialState.pressed)) return Colors.blue;
-                return Colors.pink;
-              }))),
+                    return Colors.pink;
+                  }))),
         ],
       ));
 }
