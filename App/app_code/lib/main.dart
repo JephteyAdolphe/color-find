@@ -7,7 +7,6 @@ import 'menu.dart';
 import 'canvas.dart';
 import 'globals.dart' as globals;
 
-
 int selectedLayer = -1;
 // Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
@@ -33,8 +32,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
 class DrawingBlock extends StatefulWidget {
   @override
   _DrawingBlockState createState() => _DrawingBlockState();
@@ -53,38 +50,6 @@ class _DrawingBlockState extends State<DrawingBlock> {
         title: Text('Test2'),
       ),
       drawer: getMenu(context),
-        /*
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            ListTile(
-              title: Text('Blue'),
-              onTap: () {
-                activeColor = Colors.blue;
-              },
-            ),
-            ListTile(
-              title: Text('Black'),
-              onTap: () {
-                activeColor = Colors.black;
-              },
-            ),
-            ListTile(
-              title: Text('Red'),
-              onTap: () {
-                activeColor = Colors.red;
-              },
-            ),
-            ListTile(
-              title: Text('White'),
-              onTap: () {
-                activeColor = Colors.white;
-              },
-            ),
-          ],
-        ),
-      ),
-      */
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
@@ -123,21 +88,19 @@ class _DrawingBlockState extends State<DrawingBlock> {
                 points: globals.records,
               ),
             ),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Container(
-                              color: const Color(0xffffff).withOpacity(0)),
-                        ),
-                      ],
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                            color: const Color(0xffffff).withOpacity(0)),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
@@ -156,6 +119,10 @@ class MyPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint background = Paint()..color = Colors.white;
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    if (!globals.recorderInserted) {
+      globals.recorderInserted = true;
+      canvas = new Canvas(globals.recorder);
+    }
     canvas.drawRect(rect, background);
 
     for (int x = 0; x < points.length - 1; x++) {
@@ -174,4 +141,3 @@ class MyPainter extends CustomPainter {
     return true;
   }
 }
-

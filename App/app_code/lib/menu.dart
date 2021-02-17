@@ -37,6 +37,7 @@ Widget getMenu(BuildContext context) {
           title: Text('Save'),
           onTap: () {
             // Go to page
+            globals.saveImage();
             Navigator.pop(context);
           },
         ),
