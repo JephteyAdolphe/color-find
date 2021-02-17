@@ -29,6 +29,7 @@ Widget getMenu(BuildContext context) {
           title: Text('Restart'),
           onTap: () {
             // Go to page
+            globals.records.clear();
             Navigator.pop(context);
           },
         ),
@@ -36,7 +37,6 @@ Widget getMenu(BuildContext context) {
           title: Text('Save'),
           onTap: () {
             // Go to page
-            globals.records.clear();
             Navigator.pop(context);
           },
         ),
