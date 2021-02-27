@@ -19,11 +19,25 @@ class ColorRecord {
 Color activeColor = Colors.black26; //globally selected/current color
 
 PictureRecorder recorder = new PictureRecorder();
+//Canvas canvas = new Canvas(recorder);
 bool recorderInserted = false;
 
+Future<String> getStorageDirectory() async {
+  if (Platform.isAndroid) {
+    return (await getExternalStorageDirectory()).path;  // OR return "/storage/emulated/0/Download";
+  } else {
+    return (await getApplicationDocumentsDirectory()).path;
+  }
+}
+
 void saveImage() async {
-  final directory = await getExternalStorageDirectory();
+  /*
+  final directory2 = await getApplicationDocumentsDirectory();
+  print('$directory2');
+  */
+  final directory = await getApplicationDocumentsDirectory();
   final myImagePath = '${directory.path}/ColorFind';
+  print('$myImagePath');
   final myImgDir = await new Directory(myImagePath).create();
 
   print(myImagePath);
@@ -32,6 +46,7 @@ void saveImage() async {
   final img = await picture.toImage(200, 200);
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
+  recorder = new PictureRecorder();
   recorderInserted = false;
 
   print('test2');

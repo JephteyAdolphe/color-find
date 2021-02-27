@@ -34,10 +34,11 @@ Widget getMenu(BuildContext context) {
           },
         ),
         ListTile(
-          title: Text('Save'),
+          title: Text('Save & Clear'),
           onTap: () {
             // Go to page
             globals.saveImage();
+            globals.records.clear();
             Navigator.pop(context);
           },
         ),
