@@ -86,6 +86,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
             CustomPaint(
               painter: MyPainter(
                 points: globals.records,
+                canvas: globals.canvas,
               ),
             ),
             Row(
@@ -112,17 +113,18 @@ class _DrawingBlockState extends State<DrawingBlock> {
 
 class MyPainter extends CustomPainter {
   List<globals.ColorRecord> points;
+  Canvas canvas;
 
-  MyPainter({this.points});
-
+  MyPainter({this.points, this.canvas});
+  //Canvas asd = new Canvas(globals.recorder);
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(canvas, Size size) {
     Paint background = Paint()..color = Colors.white;
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    if (!globals.recorderInserted) {
-      globals.recorderInserted = true;
-      canvas = new Canvas(globals.recorder);
-    }
+    //if (!globals.recorderInserted) {
+    //  globals.recorderInserted = true;
+    //  asd = new Canvas(globals.recorder);
+    //}
     canvas.drawRect(rect, background);
 
     for (int x = 0; x < points.length - 1; x++) {
