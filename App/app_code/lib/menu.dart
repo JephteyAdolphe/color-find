@@ -19,9 +19,18 @@ Widget getMenu(BuildContext context) {
           ),
         ),
         ListTile(
-          title: Text('New Image'),
+          title: Text('Load Image 1'),
           onTap: () {
             // Go to page
+            globals.fetchFileData("01");
+            Navigator.pop(context);
+          },
+        ),
+        ListTile(
+          title: Text('Load Image 2'),
+          onTap: () {
+            // Go to page
+            globals.fetchFileData("02");
             Navigator.pop(context);
           },
         ),
@@ -39,21 +48,66 @@ Widget getMenu(BuildContext context) {
             // Go to page
             globals.saveImage();
             globals.records.clear();
-            Navigator.pop(context);
+            showDialog(
+              context: context,
+              builder: (context) => new AlertDialog(
+                title: new Text('Save & Clear'),
+                content: Text('Cleared but probably not saving, Check Android: data/com.exapmle.app_code'),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // dismisses only the dialog and returns nothing
+                    },
+                    child: new Text('OK'),
+                  ),
+                ],
+              ),
+            );
           },
         ),
         ListTile(
           title: Text('Show Outline'),
           onTap: () {
             // Go to page
-            Navigator.pop(context);
+            showDialog(
+              context: context,
+              builder: (context) => new AlertDialog(
+                title: new Text('Show Outline'),
+                content: Text('Not implemented.'),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // dismisses only the dialog and returns nothing
+                    },
+                    child: new Text('OK'),
+                  ),
+                ],
+              ),
+            );
           },
         ),
         ListTile(
           title: Text('Show Original'),
           onTap: () {
             // Go to page
-            Navigator.pop(context);
+            showDialog(
+              context: context,
+              builder: (context) => new AlertDialog(
+                title: new Text('Show Original'),
+                content: Text('Not implemented.'),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // dismisses only the dialog and returns nothing
+                    },
+                    child: new Text('OK'),
+                  ),
+                ],
+              ),
+            );
           },
         ),
       ],

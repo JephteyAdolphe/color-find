@@ -1,4 +1,5 @@
 library app_code.globals;
+// Globals variables
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -7,8 +8,16 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:permission_handler/permission_handler.dart';
-
+//import directives
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+//
 List<ColorRecord> records = []; //record of all colors
+Color activeColor = Colors.black26; //globally selected/current color
+
+PictureRecorder recorder = new PictureRecorder();
+Canvas canvas = new Canvas(recorder);
+bool recorderInserted = false;
 
 class ColorRecord {
   Offset point;
@@ -17,12 +26,81 @@ class ColorRecord {
   ColorRecord({this.point, this.colorRecord});
 }
 
-Color activeColor = Colors.black26; //globally selected/current color
+// GLD import
 
-PictureRecorder recorder = new PictureRecorder();
-Canvas canvas = new Canvas(recorder);
-bool recorderInserted = false;
+class Image {
+  String layerMatrix = '';
+  String numLayer = '';
+  String colorMap = '';
+  String row = '';
+  String column = '';
+  String title = '';
+  List<List<Cell>> matrix;
+}
 
+class Cell {
+  int value;
+
+  Cell() {
+    value = 0;
+  }
+}
+
+class Counter {
+  int cntr;
+
+  Counter() {
+    cntr = 0;
+  }
+}
+
+//Create Image Class
+Image loadedImage = new Image();
+
+void fetchFileData(String id) async {
+  //START
+  String readLayerMatrix;
+  String readNumLayer;
+  String readColorMap;
+  String readRow;
+  String readColumn;
+  String readTitle;
+  //create counter
+  Counter x = new Counter();
+  //create array
+  var array;
+  //EX
+  //load text files
+  readLayerMatrix = await rootBundle.loadString('assets/' + id + '/layerMatrix.txt');
+  readNumLayer = await rootBundle.loadString('assets/' + id + '/numLayer.txt');
+  readColorMap = await rootBundle.loadString('assets/' + id + '/colorMap.txt');
+  readRow = await rootBundle.loadString('assets/' + id + '/row.txt');
+  readColumn = await rootBundle.loadString('assets/' + id + '/column.txt');
+  readTitle = await rootBundle.loadString('assets/' + id + '/title.txt');
+
+  //load text files into Image class
+  loadedImage.layerMatrix = readLayerMatrix;
+  loadedImage.numLayer = readNumLayer;
+  loadedImage.colorMap = readColorMap;
+  loadedImage.row = readRow;
+  loadedImage.column = readColumn;
+  loadedImage.title = readTitle;
+  //create matrix and store in Image class
+  array = loadedImage.layerMatrix.split(",");
+  loadedImage.matrix = new List.generate(int.parse(loadedImage.row),
+          (i) => new List.generate(int.parse(loadedImage.column), (j) => new Cell()));
+  for (var i = 0; i < int.parse(loadedImage.row); i++) {
+    for (var j = 0; j < int.parse(loadedImage.column); j++) {
+      loadedImage.matrix[i][j].value = int.parse(array[(x.cntr)]);
+      x.cntr++;
+    }
+  }
+  x.cntr = 0;
+  //END
+}
+
+
+// Saving images
 Future<String> getStorageDirectory() async {
   if (Platform.isAndroid) {
     return  (await getExternalStorageDirectory()).path;  // OR return "/storage/emulated/0/Download"; "storage/emulated/0/Pictures";//
@@ -41,7 +119,7 @@ void saveImage() async {
     print("");
   }
 
-// You can can also directly ask the permission about its status.
+  // You can can also directly ask the permission about its status.
   if (await Permission.location.isRestricted) {
     // The OS restricts access, for example because of parental controls.
   }
