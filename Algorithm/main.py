@@ -165,17 +165,43 @@ class Algorithm:
             print(f"Could not find the file {self.__grayscalePath} to delete")
 
     def export(self) -> None:
+        try: 
+            os.makedirs("./" + str(self.__id))
+        except OSError:
+            if not os.path.isdir("./" + str(self.__id)):
+                raise
+        self.saveTitleTxt()
+        self.saveRowTxt()
+        self.saveColumnTxt()
         self.saveidArrTxt()
         self.saveidColorMapTxt()
         self.saveNumLayerTxt()
+	
+    def saveTitleTxt(self) -> None:
+        txtFile = "./" + str(self.__id) + "/title.txt"
+        if not os.path.isfile(txtFile):
+            with open(txtFile, "w") as appen:
+                appen.write(str(self.__path.split(".")[0]))
+			
+    def saveColumnTxt(self) -> None:
+        txtFile = "./" + str(self.__id) + "/column.txt"
+        if not os.path.isfile(txtFile):
+            with open(txtFile, "w") as appen:
+                appen.write(str(self.getDimensions()[1]))
+			
+    def saveRowTxt(self) -> None:
+        txtFile = "./" + str(self.__id) + "/row.txt"
+        if not os.path.isfile(txtFile):
+            with open(txtFile, "w") as appen:
+                appen.write(str(self.getDimensions()[0]))
 
     def saveidArrTxt(self) -> None:
-        txtFile = self.__path.split(".")[0] + "." + str(self.__id) + ".layerMatrix.txt"
+        txtFile = "./" + str(self.__id) + "/layerMatrix.txt"
         if not os.path.isfile(txtFile):
             np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
 
     def saveidColorMapTxt(self) -> None:
-        txtFile = self.__path.split(".")[0] + "." + str(self.__id) + ".colorMap.txt"
+        txtFile = "./" + str(self.__id) + "/colorMap.txt"
         if not os.path.isfile(txtFile):
             for target, values in self.idColorMap.items():
                 a = np.array(values)
@@ -183,7 +209,7 @@ class Algorithm:
                     np.savetxt(appen, a.reshape(1,a.shape[0]), fmt="%d", delimiter=",")
 
     def saveNumLayerTxt(self) -> None:
-        txtFile = self.__path.split(".")[0] + "." + str(self.__id) + ".numLayer.txt"
+        txtFile = "./" + str(self.__id) + "/numLayer.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
                 appen.write(str(len(self.idColorMap)))
