@@ -163,12 +163,34 @@ class Algorithm:
             print("Image deleted")
         except FileNotFoundError:
             print(f"Could not find the file {self.__grayscalePath} to delete")
+			
 
-    def export(self) -> None:
+    def updateExport(self) -> None: # Clear files and export
+        self.purgeSaved()
+        self.export()
+
+    def purgeSaved(self) -> None: # Clear files
+        directory  = "./exports/" + str(self.__id)
+        if os.path.isdir(directory):
+            if os.path.isfile(directory + "/title.txt"):
+                os.remove(directory + "/title.txt")
+            if os.path.isfile(directory + "/column.txt"):
+                os.remove(directory + "/column.txt")
+            if os.path.isfile(directory + "/row.txt"):
+                os.remove(directory + "/row.txt")
+            if os.path.isfile(directory + "/layerMatrix.txt"):
+                os.remove(directory + "/layerMatrix.txt")
+            if os.path.isfile(directory + "/colorMap.txt"):
+                os.remove(directory + "/colorMap.txt")
+            if os.path.isfile(directory + "/numLayer.txt"):
+                os.remove(directory + "/numLayer.txt")
+
+    def export(self) -> None: # Export files and create directory
+        directory  = "./exports/" + str(self.__id)
         try: 
-            os.makedirs("./" + str(self.__id))
+            os.makedirs(directory)
         except OSError:
-            if not os.path.isdir("./" + str(self.__id)):
+            if not os.path.isdir(directory):
                 raise
         self.saveTitleTxt()
         self.saveRowTxt()
@@ -178,30 +200,30 @@ class Algorithm:
         self.saveNumLayerTxt()
 	
     def saveTitleTxt(self) -> None:
-        txtFile = "./" + str(self.__id) + "/title.txt"
+        txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__path.split(".")[0]))
+                appen.write(str(self.__path.split(".")[1].split("/")[2]))
 			
     def saveColumnTxt(self) -> None:
-        txtFile = "./" + str(self.__id) + "/column.txt"
+        txtFile = "./exports/" + str(self.__id) + "/column.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
                 appen.write(str(self.getDimensions()[1]))
 			
     def saveRowTxt(self) -> None:
-        txtFile = "./" + str(self.__id) + "/row.txt"
+        txtFile = "./exports/" + str(self.__id) + "/row.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
                 appen.write(str(self.getDimensions()[0]))
 
     def saveidArrTxt(self) -> None:
-        txtFile = "./" + str(self.__id) + "/layerMatrix.txt"
+        txtFile = "./exports/" + str(self.__id) + "/layerMatrix.txt"
         if not os.path.isfile(txtFile):
             np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
 
     def saveidColorMapTxt(self) -> None:
-        txtFile = "./" + str(self.__id) + "/colorMap.txt"
+        txtFile = "./exports/" + str(self.__id) + "/colorMap.txt"
         if not os.path.isfile(txtFile):
             for target, values in self.idColorMap.items():
                 a = np.array(values)
@@ -209,7 +231,7 @@ class Algorithm:
                     np.savetxt(appen, a.reshape(1,a.shape[0]), fmt="%d", delimiter=",")
 
     def saveNumLayerTxt(self) -> None:
-        txtFile = "./" + str(self.__id) + "/numLayer.txt"
+        txtFile = "./exports/" + str(self.__id) + "/numLayer.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
                 appen.write(str(len(self.idColorMap)))
@@ -229,12 +251,45 @@ class Algorithm:
         return self.idColorMap
 
 
-ball = Algorithm("ball.jpg",1)
-# ball.saveToTxt()
-ball.export()
-# imageIdToRGB = ball.idToRGB()
-# plt.imshow(imageIdToRGB)
-# plt.show()
+# Get product names that were done before
+items = []
+with open("items.txt", "r") as f:
+  for line in f:
+    items.append(line.strip())
+print("Items List:", items)
 
-dog = Algorithm("dog.png",2)
-dog.export()
+# images to convert
+targets = os.listdir("./Images")
+print("Pictures List:", targets)
+
+# Target size
+# widthInput = 100
+# HeightInput = 100
+
+# Controls
+itemUpdate = False #Update existing item
+itemExists = False #Item has been processed name-wise before
+
+# Start
+for target in targets:
+    try:
+        tempInt = int(items.index(target))
+        itemExists = True
+    except ValueError:
+        tempInt = int(len(items))
+        items.append(target)
+        itemExists = False
+
+    if itemUpdate: # only update old images Exports when itemUpdate is true
+        temp = Algorithm("./Images/"+target, tempInt)
+        temp.updateExport()
+    else: # new images get exported
+        temp = Algorithm("./Images/"+target, tempInt)
+        temp.updateExport()
+
+
+# Remember finished products
+print("End List:", items)
+with open("items.txt", "w") as f:
+    for s in items:
+        f.write(str(s) +"\n")
