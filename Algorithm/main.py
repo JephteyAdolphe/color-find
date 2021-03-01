@@ -270,22 +270,27 @@ print("Pictures List:", targets)
 itemUpdate = False #Update existing item
 itemExists = False #Item has been processed name-wise before
 
+print("Beginning Exporting:")
 # Start
 for target in targets:
     try:
         tempInt = int(items.index(target))
         itemExists = True
+        print("<>" + target, "Exists in items.txt")
     except ValueError:
         tempInt = int(len(items))
         items.append(target)
         itemExists = False
 
-    if itemUpdate: # only update old images Exports when itemUpdate is true
+    if itemUpdate: # Export all images
+        print("<>Exporting:", target)
         temp = Algorithm("./Images/"+target, tempInt)
         temp.updateExport()
-    else: # new images get exported
+    elif not itemExists: # Only new images get exported
+        print("<>Exporting:", target)
         temp = Algorithm("./Images/"+target, tempInt)
         temp.updateExport()
+print("Exporting Completed")
 
 
 # Remember finished products
