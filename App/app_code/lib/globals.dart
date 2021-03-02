@@ -1,6 +1,4 @@
 library app_code.globals;
-// Globals variables
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,7 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:permission_handler/permission_handler.dart';
-//import directives
+
+//import directives: Pavan
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 //
@@ -132,7 +131,7 @@ void saveImage() async {
 
   final picture = recorder.endRecording();
   print(picture.toString());
-  final img = await picture.toImage(200, 200);
+  final img = await picture.toImage(400,600);// REQUIRES DYNAMIC SIZE OF PHONE
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
   recorder = new PictureRecorder();
