@@ -8,6 +8,26 @@ import 'canvas.dart';
 import 'globals.dart' as globals;
 
 int selectedLayer = -1;
+int tempLayer = -1;
+//Dummy Layers
+var dummyHeight = 600;
+var dummyHLayers = 3;
+var dummyHSeg = dummyHeight/dummyHLayers;
+var dummyWidth = 400;
+var dummyWLayers = 2;
+var dummyWSeg = dummyWidth/dummyWLayers;
+int dummyLayers(selectedHeight,selectedWidth) {
+  for(int heightLayer = 1; heightLayer <= dummyHLayers; heightLayer++){
+    for(int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++){
+      if(selectedWidth < dummyWSeg*widthLayer + 1) {
+        if(selectedHeight < dummyHSeg*heightLayer + 1) {
+          return heightLayer + dummyHLayers*(widthLayer - 1); // just a dummy segmentation of equal sizes
+        }
+      }
+    }
+  }
+  return -1; // out of bounds -> null layer
+}
 // Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
 void main() {
@@ -54,6 +74,14 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanDown: (details) {
           this.setState(() {
             selectedLayer = 1; // where select a layer
+            selectedLayer = dummyLayers(details.localPosition.dy
+              ,details.localPosition.dx);
+            print("Selected Layer:");
+            print(selectedLayer);
+            print("Local Position Y:");
+            print(details.localPosition.dy);
+            print("Local Position X:");
+            print(details.localPosition.dx);
             globals.records.add(globals.ColorRecord(
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
@@ -65,7 +93,13 @@ class _DrawingBlockState extends State<DrawingBlock> {
         },
         onPanUpdate: (details) {
           this.setState(() {
-            if (selectedLayer == 1)
+            tempLayer = 1; // should equal -1, -1 implies null layer
+            /*
+            tempLayer = dummyLayers(coord[0],coord[1])
+            */
+            tempLayer = dummyLayers(details.localPosition.dy
+                ,details.localPosition.dx);
+            if (tempLayer == selectedLayer)
               globals.records.add(globals.ColorRecord(
                   point: details.localPosition,
                   colorRecord: Paint()
@@ -77,6 +111,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanEnd: (details) {
           this.setState(() {
             selectedLayer = -1; // where deselect a layer
+            tempLayer = -1; // deselect
             globals.records.add(null);
           });
         },
