@@ -16,6 +16,13 @@ var dummyHSeg = dummyHeight/dummyHLayers;
 var dummyWidth = 400;
 var dummyWLayers = 2;
 var dummyWSeg = dummyWidth/dummyWLayers;
+/*
+1 | 4
+-----
+2 | 5
+-----
+3 | 6
+*/
 int dummyLayers(selectedHeight,selectedWidth) {
   for(int heightLayer = 1; heightLayer <= dummyHLayers; heightLayer++){
     for(int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++){
@@ -67,21 +74,22 @@ class _DrawingBlockState extends State<DrawingBlock> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Test2'),
+        title: Text('Layering Dummy Test'),
       ),
       drawer: getMenu(context),
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
-            selectedLayer = 1; // where select a layer
             selectedLayer = dummyLayers(details.localPosition.dy
               ,details.localPosition.dx);
+            //Debug
             print("Selected Layer:");
             print(selectedLayer);
             print("Local Position Y:");
             print(details.localPosition.dy);
             print("Local Position X:");
             print(details.localPosition.dx);
+            //
             globals.records.add(globals.ColorRecord(
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
@@ -93,10 +101,6 @@ class _DrawingBlockState extends State<DrawingBlock> {
         },
         onPanUpdate: (details) {
           this.setState(() {
-            tempLayer = 1; // should equal -1, -1 implies null layer
-            /*
-            tempLayer = dummyLayers(coord[0],coord[1])
-            */
             tempLayer = dummyLayers(details.localPosition.dy
                 ,details.localPosition.dx);
             if (tempLayer == selectedLayer)
@@ -131,7 +135,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     children: [
                       Expanded(
                         child: Container(
-                            color: const Color(0xffffff).withOpacity(0)),
+                            color: const Color(0xffffff).withOpacity(0)), // used to create a box for GestureDetector
                       ),
                     ],
                   ),
@@ -170,7 +174,7 @@ class MyPainter extends CustomPainter {
         canvas.drawPoints(PointMode.points, [points[x].point], paint);
       }
     }
-    // Recording
+    // Recording effect
     globals.canvas.drawRect(rect, background);
 
     for (int x = 0; x < points.length - 1; x++) {
