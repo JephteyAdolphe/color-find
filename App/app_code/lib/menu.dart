@@ -110,6 +110,13 @@ Widget getMenu(BuildContext context) {
             );
           },
         ),
+        ListTile(
+          title: Text('commandx'),
+          onTap: () {
+            // Go to page
+            globals.printCanvasSize();
+          },
+        ),
       ],
     ),
   );

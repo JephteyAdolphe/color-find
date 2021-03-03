@@ -9,13 +9,11 @@ import 'globals.dart' as globals;
 
 int selectedLayer = -1;
 int tempLayer = -1;
+//Prototype
+int getLayer(targetWidth,targetHeight) {
+  return globals.loadedImage.matrix[targetWidth.floor()][targetHeight.floor()].value; //works if same size
+}
 //Dummy Layers
-var dummyHeight = 600;
-var dummyHLayers = 3;
-var dummyHSeg = dummyHeight/dummyHLayers;
-var dummyWidth = 400;
-var dummyWLayers = 2;
-var dummyWSeg = dummyWidth/dummyWLayers;
 /*
 1 | 4
 -----
@@ -24,6 +22,12 @@ var dummyWSeg = dummyWidth/dummyWLayers;
 3 | 6
 */
 int dummyLayers(selectedHeight,selectedWidth) {
+  var dummyHeight = globals.drawHeight;
+  var dummyHLayers = 3;
+  var dummyHSeg = dummyHeight/dummyHLayers;
+  var dummyWidth = globals.drawWidth;
+  var dummyWLayers = 2;
+  var dummyWSeg = dummyWidth/dummyWLayers;
   for(int heightLayer = 1; heightLayer <= dummyHLayers; heightLayer++){
     for(int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++){
       if(selectedWidth < dummyWSeg*widthLayer + 1) {
@@ -72,6 +76,10 @@ class DrawingBlock extends StatefulWidget {
 class _DrawingBlockState extends State<DrawingBlock> {
   @override
   Widget build(BuildContext context) {
+    globals.screenH = MediaQuery.of(context).size.height;
+    globals.screenW = MediaQuery.of(context).size.width;
+    globals.appBarH = AppBar().preferredSize.height;
+    globals.setCanvasSize();
     return Scaffold(
       appBar: AppBar(
         title: Text('Layering Dummy Test'),
@@ -86,9 +94,9 @@ class _DrawingBlockState extends State<DrawingBlock> {
             print("Selected Layer:");
             print(selectedLayer);
             print("Local Position Y:");
-            print(details.localPosition.dy);
+            print(details.globalPosition.dy);
             print("Local Position X:");
-            print(details.localPosition.dx);
+            print(details.globalPosition.dx);
             //
             globals.records.add(globals.ColorRecord(
                 // [1 , 2 ; 1 , 0]
