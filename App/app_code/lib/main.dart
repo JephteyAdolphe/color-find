@@ -106,6 +106,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     ..color = globals.activeColor
                     ..strokeWidth = 2
                     ..strokeCap = StrokeCap.round));
+            else globals.records.add(null);
           });
         },
         onPanEnd: (details) {
