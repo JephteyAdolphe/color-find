@@ -18,6 +18,30 @@ PictureRecorder recorder = new PictureRecorder();
 Canvas canvas = new Canvas(recorder);
 bool recorderInserted = false;
 
+// screen sizing
+var screenW;
+var screenH;
+var appBarH;
+var drawWidth;
+var drawHeight;
+
+void setCanvasSize() {
+  drawHeight = (screenH - appBarH - 65 - 20).floor(); // 65 = palette,, 20 = extra buffer
+  drawWidth = (screenW).floor();
+}
+
+void printCanvasSize() {
+  print(screenW);
+  print(screenH);
+  print(appBarH);
+  print(drawHeight);
+  print(drawWidth);
+}
+
+List<double> getCanvasSize() {
+  return [drawWidth,drawHeight];
+}
+
 class ColorRecord {
   Offset point;
   Paint colorRecord;

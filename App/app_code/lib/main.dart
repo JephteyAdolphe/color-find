@@ -8,6 +8,37 @@ import 'canvas.dart';
 import 'globals.dart' as globals;
 
 int selectedLayer = -1;
+int tempLayer = -1;
+//Prototype
+int getLayer(targetWidth,targetHeight) {
+  return globals.loadedImage.matrix[targetWidth.floor()][targetHeight.floor()].value; //works if same size
+}
+//Dummy Layers
+/*
+1 | 4
+-----
+2 | 5
+-----
+3 | 6
+*/
+int dummyLayers(selectedHeight,selectedWidth) {
+  var dummyHeight = globals.drawHeight;
+  var dummyHLayers = 3;
+  var dummyHSeg = dummyHeight/dummyHLayers;
+  var dummyWidth = globals.drawWidth;
+  var dummyWLayers = 2;
+  var dummyWSeg = dummyWidth/dummyWLayers;
+  for(int heightLayer = 1; heightLayer <= dummyHLayers; heightLayer++){
+    for(int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++){
+      if(selectedWidth < dummyWSeg*widthLayer + 1) {
+        if(selectedHeight < dummyHSeg*heightLayer + 1) {
+          return heightLayer + dummyHLayers*(widthLayer - 1); // just a dummy segmentation of equal sizes
+        }
+      }
+    }
+  }
+  return -1; // out of bounds -> null layer
+}
 // Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
 void main() {
@@ -45,15 +76,28 @@ class DrawingBlock extends StatefulWidget {
 class _DrawingBlockState extends State<DrawingBlock> {
   @override
   Widget build(BuildContext context) {
+    globals.screenH = MediaQuery.of(context).size.height;
+    globals.screenW = MediaQuery.of(context).size.width;
+    globals.appBarH = AppBar().preferredSize.height;
+    globals.setCanvasSize();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Test2'),
+        title: Text('Layering Dummy Test'),
       ),
       drawer: getMenu(context),
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
-            selectedLayer = 1; // where select a layer
+            selectedLayer = dummyLayers(details.localPosition.dy
+              ,details.localPosition.dx);
+            //Debug
+            print("Selected Layer:");
+            print(selectedLayer);
+            print("Local Position Y:");
+            print(details.globalPosition.dy);
+            print("Local Position X:");
+            print(details.globalPosition.dx);
+            //
             globals.records.add(globals.ColorRecord(
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
@@ -65,18 +109,22 @@ class _DrawingBlockState extends State<DrawingBlock> {
         },
         onPanUpdate: (details) {
           this.setState(() {
-            if (selectedLayer == 1)
+            tempLayer = dummyLayers(details.localPosition.dy
+                ,details.localPosition.dx);
+            if (tempLayer == selectedLayer)
               globals.records.add(globals.ColorRecord(
                   point: details.localPosition,
                   colorRecord: Paint()
                     ..color = globals.activeColor
                     ..strokeWidth = 2
                     ..strokeCap = StrokeCap.round));
+            else globals.records.add(null);
           });
         },
         onPanEnd: (details) {
           this.setState(() {
             selectedLayer = -1; // where deselect a layer
+            tempLayer = -1; // deselect
             globals.records.add(null);
           });
         },
@@ -95,7 +143,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     children: [
                       Expanded(
                         child: Container(
-                            color: const Color(0xffffff).withOpacity(0)),
+                            color: const Color(0xffffff).withOpacity(0)), // used to create a box for GestureDetector
                       ),
                     ],
                   ),
@@ -134,7 +182,7 @@ class MyPainter extends CustomPainter {
         canvas.drawPoints(PointMode.points, [points[x].point], paint);
       }
     }
-    // Recording
+    // Recording effect
     globals.canvas.drawRect(rect, background);
 
     for (int x = 0; x < points.length - 1; x++) {
