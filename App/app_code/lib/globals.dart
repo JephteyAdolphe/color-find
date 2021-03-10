@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 //import directives: Pavan
 import 'package:flutter/material.dart';
+import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 
 //
@@ -112,6 +113,7 @@ void fetchFileData(String id) async {
   loadedImage.row = readRow;
   loadedImage.column = readColumn;
   loadedImage.title = readTitle;
+
   //create matrix and store in Image class
   array = loadedImage.layerMatrix.split(",");
   loadedImage.matrix = new List.generate(

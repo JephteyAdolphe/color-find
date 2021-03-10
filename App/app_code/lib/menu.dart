@@ -19,18 +19,19 @@ Widget getMenu(BuildContext context) {
           ),
         ),
         ListTile(
-          title: Text('Load Image 1'),
+          title: Text('Load Image 0'),
           onTap: () {
             // Go to page
-            globals.fetchFileData("01");
+            globals.fetchFileData("0");
+            //print(globals.loadedImage.title);
             Navigator.pop(context);
           },
         ),
         ListTile(
-          title: Text('Load Image 2'),
+          title: Text('Load Image 1'),
           onTap: () {
             // Go to page
-            globals.fetchFileData("02");
+            globals.fetchFileData("1");
             Navigator.pop(context);
           },
         ),
