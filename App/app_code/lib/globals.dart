@@ -1,4 +1,5 @@
 library app_code.globals;
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -10,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 //import directives: Pavan
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+
 //
 List<ColorRecord> records = []; //record of all colors
 Color activeColor = Colors.black26; //globally selected/current color
@@ -26,7 +28,8 @@ var drawWidth;
 var drawHeight;
 
 void setCanvasSize() {
-  drawHeight = (screenH - appBarH - 65 - 20).floor(); // 65 = palette,, 20 = extra buffer
+  drawHeight =
+      (screenH - appBarH - 65 - 20).floor(); // 65 = palette,, 20 = extra buffer
   drawWidth = (screenW).floor();
 }
 
@@ -39,7 +42,7 @@ void printCanvasSize() {
 }
 
 List<double> getCanvasSize() {
-  return [drawWidth,drawHeight];
+  return [drawWidth, drawHeight];
 }
 
 class ColorRecord {
@@ -94,7 +97,8 @@ void fetchFileData(String id) async {
   var array;
   //EX
   //load text files
-  readLayerMatrix = await rootBundle.loadString('assets/' + id + '/layerMatrix.txt');
+  readLayerMatrix =
+      await rootBundle.loadString('assets/' + id + '/layerMatrix.txt');
   readNumLayer = await rootBundle.loadString('assets/' + id + '/numLayer.txt');
   readColorMap = await rootBundle.loadString('assets/' + id + '/colorMap.txt');
   readRow = await rootBundle.loadString('assets/' + id + '/row.txt');
@@ -110,8 +114,10 @@ void fetchFileData(String id) async {
   loadedImage.title = readTitle;
   //create matrix and store in Image class
   array = loadedImage.layerMatrix.split(",");
-  loadedImage.matrix = new List.generate(int.parse(loadedImage.row),
-          (i) => new List.generate(int.parse(loadedImage.column), (j) => new Cell()));
+  loadedImage.matrix = new List.generate(
+      int.parse(loadedImage.row),
+      (i) =>
+          new List.generate(int.parse(loadedImage.column), (j) => new Cell()));
   for (var i = 0; i < int.parse(loadedImage.row); i++) {
     for (var j = 0; j < int.parse(loadedImage.column); j++) {
       loadedImage.matrix[i][j].value = int.parse(array[(x.cntr)]);
@@ -122,11 +128,11 @@ void fetchFileData(String id) async {
   //END
 }
 
-
 // Saving images
 Future<String> getStorageDirectory() async {
   if (Platform.isAndroid) {
-    return  (await getExternalStorageDirectory()).path;  // OR return "/storage/emulated/0/Download"; "storage/emulated/0/Pictures";//
+    return (await getExternalStorageDirectory())
+        .path; // OR return "/storage/emulated/0/Download"; "storage/emulated/0/Pictures";//
   } else {
     return (await getApplicationDocumentsDirectory()).path; // Iphone
   }
@@ -147,7 +153,7 @@ void saveImage() async {
     // The OS restricts access, for example because of parental controls.
   }
   final directory = await getStorageDirectory();
-  final myImagePath = '$directory'+'/ColorFind';
+  final myImagePath = '$directory' + '/ColorFind';
   print('$myImagePath');
   final myImgDir = await new Directory(myImagePath).create();
 
@@ -155,7 +161,7 @@ void saveImage() async {
 
   final picture = recorder.endRecording();
   print(picture.toString());
-  final img = await picture.toImage(400,600);// REQUIRES DYNAMIC SIZE OF PHONE
+  final img = await picture.toImage(400, 600); // REQUIRES DYNAMIC SIZE OF PHONE
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
   recorder = new PictureRecorder();
