@@ -7,13 +7,14 @@ from PIL import Image, ImageFilter
 class Algorithm:
 
     # initializes class variables / paths
-    def __init__(self, path: str, id: int) -> None:
+    def __init__(self, path: str, id: int, width = 50, height = 50) -> None:
         try:
             self.__img = Image.open(path)
             self.__path = path
             self.__id = id
-            if self.getDimensions()[0] > 100 and self.getDimensions()[1] > 100:
-                self.__resize()
+            self.__width = width #default 50
+            self.__height = height #default 50
+            self.__resize(height,width)
 
             self.idColorMap = None
             self.idArr = self.__getIDArray()
@@ -50,8 +51,8 @@ class Algorithm:
         except TypeError:
             print("No image to display")
 
-    def __resize(self) -> None:
-        self.__img = self.__img.resize((100, 100))
+    def __resize(self, height, width) -> None:
+        self.__img = self.__img.resize((height, width))
 
     # returns 2D array where each rgb pixel is represented by a string
     def getRGB(self) -> list:
@@ -220,7 +221,7 @@ class Algorithm:
     def saveidArrTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/layerMatrix.txt"
         if not os.path.isfile(txtFile):
-            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
+            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",", newline=',')
 
     def saveidColorMapTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/colorMap.txt"
@@ -250,6 +251,12 @@ class Algorithm:
     def getColorMap(self) -> dict:
         return self.idColorMap
 
+# Get desired size
+sizing = []
+with open("resizeTarget.txt", "r") as f:
+  for line in f:
+    sizing.append(line.strip())
+print("resizeTarget:", sizing)
 
 # Get product names that were done before
 items = []
@@ -267,7 +274,7 @@ print("Pictures List:", targets)
 # HeightInput = 100
 
 # Controls
-itemUpdate = False #Update existing item
+itemUpdate = True #Update existing item
 itemExists = False #Item has been processed name-wise before
 
 print("Beginning Exporting:")
@@ -284,11 +291,11 @@ for target in targets:
 
     if itemUpdate: # Export all images
         print("<>Exporting:", target)
-        temp = Algorithm("./Images/"+target, tempInt)
+        temp = Algorithm("./Images/"+target, tempInt, int(sizing[0]), int(sizing[1]))
         temp.updateExport()
     elif not itemExists: # Only new images get exported
         print("<>Exporting:", target)
-        temp = Algorithm("./Images/"+target, tempInt)
+        temp = Algorithm("./Images/"+target, tempInt, int(sizing[0]), int(sizing[1]))
         temp.updateExport()
 print("Exporting Completed")
 
