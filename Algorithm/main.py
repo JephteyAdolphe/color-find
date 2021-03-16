@@ -2,18 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from PIL import Image, ImageFilter
-
+import cv2
+from sklearn.cluster import MiniBatchKMeans
 
 class Algorithm:
 
     # initializes class variables / paths
-    def __init__(self, path: str, id: int) -> None:
+    def __init__(self, path: str, id: int, width=200, height=200) -> None:
         try:
-            self.__img = Image.open(path)
+            
+            self.__img = self.kmeans(path)
             self.__path = path
             self.__id = id
-            if self.getDimensions()[0] > 100 and self.getDimensions()[1] > 100:
-                self.__resize()
+            self.__width = width  # default 50
+            self.__height = height  # default 50
+            # self.__resize(height, width)
 
             self.idColorMap = None
             self.idArr = self.__getIDArray()
@@ -24,13 +27,55 @@ class Algorithm:
             self.__img = self.__grayscaleImage = None
             print("File not found")
 
+    def canny(self):
+        plt.subplot(121), plt.imshow(img, cmap='gray')
+        plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(122), plt.imshow(edges, cmap='gray')
+        plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+        plt.show()
+
+    def kmeans(self, path):
+
+        # load the image and grab its width and height
+        image = cv2.imread(path)
+        image = cv2.resize(image, (200, 200), interpolation=cv2.INTER_NEAREST)
+        (h, w) = image.shape[:2]
+        # convert the image from the RGB color space to the L*a*b*
+        # color space -- since we will be clustering using k-means
+        # which is based on the euclidean distance, we'll use the
+        # L*a*b* color space where the euclidean distance implies
+        # perceptual meaning
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        # reshape the image into a feature vector so that k-means
+        # can be applied
+        image = image.reshape((image.shape[0] * image.shape[1], 3))
+        # apply k-means using the specified number of clusters and
+        # then create the quantized image based on the predictions
+        clt = MiniBatchKMeans(n_clusters=3)
+        labels = clt.fit_predict(image)
+        quant = clt.cluster_centers_.astype("uint8")[labels]
+        # reshape the feature vectors to images
+        quant = quant.reshape((h, w, 3))
+        image = image.reshape((h, w, 3))
+        # convert from L*a*b* to RGB
+        quant = cv2.cvtColor(quant, cv2.COLOR_LAB2BGR)
+        image = cv2.cvtColor(image, cv2.COLOR_LAB2BGR)
+        img = cv2.cvtColor(quant, cv2.COLOR_BGR2RGB)
+        # display the images and wait for a keypress
+        # cv2.imshow("ball.jpg", np.hstack([quant]))
+        # plt.imshow(img)
+        # plt.show()
+        # cv2.waitKey(0)
+
+        return Image.fromarray(img)
+
     def convertToGrayscale(self) -> None:
         # checks if we have a valid source image and edited image exists in current directory
         if self.__img and not os.path.isfile(self.__grayscalePath):
             if ".png" in self.__grayscalePath:
-                self.__grayscaleImage = self.__img.convert("LA")     # converts png image to grayscale
+                self.__grayscaleImage = self.__img.convert("LA")  # converts png image to grayscale
             else:
-                self.__grayscaleImage = self.__img.convert("L")     # converts jpeg image to grayscale
+                self.__grayscaleImage = self.__img.convert("L")  # converts jpeg image to grayscale
 
             self.__grayscaleImage.save(self.__grayscalePath)
 
@@ -50,8 +95,8 @@ class Algorithm:
         except TypeError:
             print("No image to display")
 
-    def __resize(self) -> None:
-        self.__img = self.__img.resize((100, 100))
+    def __resize(self, height, width) -> None:
+        self.__img = self.__img.resize((height, width))
 
     # returns 2D array where each rgb pixel is represented by a string
     def getRGB(self) -> list:
@@ -62,7 +107,7 @@ class Algorithm:
 
     # returns 2D array where each rgb pixel is represented by a string
     def getEditedRGB(self) -> list:
-        if self.__grayscaleImage:   # checks for valid image
+        if self.__grayscaleImage:  # checks for valid image
             return self.__rgb(self.__grayscaleImage, self.getEditedDimensions()[0], self.getEditedDimensions()[1])
         else:
             # self.convertToGrayscale()   # creates modifiable image if it doesn't already exist
@@ -90,7 +135,7 @@ class Algorithm:
 
     # return color ID array for edited image
     def getEditedIDArray(self) -> list:
-        if self.__grayscaleImage:   # checks for valid image
+        if self.__grayscaleImage:  # checks for valid image
             return self.__getID(self.__grayscaleImage, self.getEditedDimensions()[0], self.getEditedDimensions()[1])
         else:
             # self.convertToGrayscale()   # creates modifiable image if it doesn't already exist
@@ -163,14 +208,13 @@ class Algorithm:
             print("Image deleted")
         except FileNotFoundError:
             print(f"Could not find the file {self.__grayscalePath} to delete")
-			
 
-    def updateExport(self) -> None: # Clear files and export
+    def updateExport(self) -> None:  # Clear files and export
         self.purgeSaved()
         self.export()
 
-    def purgeSaved(self) -> None: # Clear files
-        directory  = "./exports/" + str(self.__id)
+    def purgeSaved(self) -> None:  # Clear files
+        directory = "./exports/" + str(self.__id)
         if os.path.isdir(directory):
             if os.path.isfile(directory + "/title.txt"):
                 os.remove(directory + "/title.txt")
@@ -185,9 +229,9 @@ class Algorithm:
             if os.path.isfile(directory + "/numLayer.txt"):
                 os.remove(directory + "/numLayer.txt")
 
-    def export(self) -> None: # Export files and create directory
-        directory  = "./exports/" + str(self.__id)
-        try: 
+    def export(self) -> None:  # Export files and create directory
+        directory = "./exports/" + str(self.__id)
+        try:
             os.makedirs(directory)
         except OSError:
             if not os.path.isdir(directory):
@@ -198,19 +242,19 @@ class Algorithm:
         self.saveidArrTxt()
         self.saveidColorMapTxt()
         self.saveNumLayerTxt()
-	
+
     def saveTitleTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__path.split(".")[1].split("/")[2]))
-			
+                appen.write(str(self.__path.split(".")[1].split("/")[-1]))
+
     def saveColumnTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
                 appen.write(str(self.getDimensions()[1]))
-			
+
     def saveRowTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/row.txt"
         if not os.path.isfile(txtFile):
@@ -220,7 +264,7 @@ class Algorithm:
     def saveidArrTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/layerMatrix.txt"
         if not os.path.isfile(txtFile):
-            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
+            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",", newline=',')
 
     def saveidColorMapTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/colorMap.txt"
@@ -228,7 +272,7 @@ class Algorithm:
             for target, values in self.idColorMap.items():
                 a = np.array(values)
                 with open(txtFile, "ab") as appen:
-                    np.savetxt(appen, a.reshape(1,a.shape[0]), fmt="%d", delimiter=",")
+                    np.savetxt(appen, a.reshape(1, a.shape[0]), fmt="%d", delimiter=",")
 
     def saveNumLayerTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/numLayer.txt"
@@ -251,50 +295,6 @@ class Algorithm:
         return self.idColorMap
 
 
-# Get product names that were done before
-items = []
-with open("items.txt", "r") as f:
-  for line in f:
-    items.append(line.strip())
-print("Items List:", items)
-
-# images to convert
-targets = os.listdir("./Images")
-print("Pictures List:", targets)
-
-# Target size
-# widthInput = 100
-# HeightInput = 100
-
-# Controls
-itemUpdate = False #Update existing item
-itemExists = False #Item has been processed name-wise before
-
-print("Beginning Exporting:")
-# Start
-for target in targets:
-    try:
-        tempInt = int(items.index(target))
-        itemExists = True
-        print("<>" + target, "Exists in items.txt")
-    except ValueError:
-        tempInt = int(len(items))
-        items.append(target)
-        itemExists = False
-
-    if itemUpdate: # Export all images
-        print("<>Exporting:", target)
-        temp = Algorithm("./Images/"+target, tempInt)
-        temp.updateExport()
-    elif not itemExists: # Only new images get exported
-        print("<>Exporting:", target)
-        temp = Algorithm("./Images/"+target, tempInt)
-        temp.updateExport()
-print("Exporting Completed")
-
-
-# Remember finished products
-print("End List:", items)
-with open("items.txt", "w") as f:
-    for s in items:
-        f.write(str(s) +"\n")
+test = Algorithm("./ball.jpg", 0)
+test.updateExport()
+test.showImage()

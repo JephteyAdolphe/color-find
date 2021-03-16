@@ -126,6 +126,7 @@ void fetchFileData(String id) async {
   }
   x.cntr = 0;
   //END
+  print(loadedImage.title);
 }
 
 // Saving images
