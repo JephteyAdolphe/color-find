@@ -5,6 +5,7 @@ from PIL import Image, ImageFilter
 import copy
 import cv2
 from sklearn.cluster import MiniBatchKMeans
+import time
 
 class Algorithm:
 
@@ -505,10 +506,11 @@ BW_enable = True # special condition to attempt to merge similar greys/blacks/wh
 
 print("Beginning Exporting:")
 imgNum = 0
-fig = plt.figure()
+#fig = plt.figure()
 rows = len(targets)
 # Start
 for target in targets:
+    startTime = time.time()
     imgNum += 1
     try:
         tempInt = int(items.index(target))
@@ -528,8 +530,9 @@ for target in targets:
         print("<>Exporting:", target)
         temp = Algorithm("./Images/"+target, tempInt, int(sizes[0]), int(sizes[1]), ktemp, BW_enable)
         temp.updateExport()
-        fig.add_subplot(rows,1,imgNum)
-        plt.imshow(temp.idToRGB())
+        #fig.add_subplot(rows,1,imgNum)
+        #plt.imshow(temp.idToRGB())
+        #plt.show()
     elif not itemExists: # Only new images get exported
         ktemp = 5
         try:
@@ -539,11 +542,11 @@ for target in targets:
         print("<>Exporting:", target)
         temp = Algorithm("./Images/"+target, tempInt, int(sizes[0]), int(sizes[1]), ktemp, BW_enable)
         temp.updateExport()
-        fig.add_subplot(rows,1,imgNum)
-        plt.imshow(temp.idToRGB())
-fig.show()
+        #fig.add_subplot(rows,1,imgNum)
+        #plt.imshow(temp.idToRGB())
+    print(target,"took",time.time()-startTime,"seconds")
 print("Exporting Completed")
-
+#fig,show()
 
 # Remember finished products
 print("End List:", items)
