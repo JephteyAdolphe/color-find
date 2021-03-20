@@ -987,7 +987,7 @@ class Algorithm_v1:
         image = cv2.cvtColor(image, cv2.COLOR_LAB2BGR)
         img = cv2.cvtColor(quant, cv2.COLOR_BGR2RGB)
         # display the images and wait for a keypress
-        cv2.imshow(path, np.hstack([image, quant]))
+        # cv2.imshow(path, np.hstack([image, quant]))
         # plt.imshow(img)
         # plt.show()
         # cv2.waitKey(0)
