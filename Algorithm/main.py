@@ -1581,10 +1581,11 @@ ball.updateExport()
 plt.imshow(ball.idToRGB())
 plt.show()
 '''
-results1 = results_of_algorithm(Algorithm_v1_old, trials= 5)
-results2 = results_of_algorithm(Algorithm_v1, trials= 5)
-results3 = results_of_algorithm(Algorithm_v2_old, trials= 5)
-results4 = results_of_algorithm(Algorithm_v2, trials= 5)
+trialx = 25
+results1 = results_of_algorithm(Algorithm_v1_old, trials= trialx)
+results2 = results_of_algorithm(Algorithm_v1, trials= trialx)
+results3 = results_of_algorithm(Algorithm_v2_old, trials= trialx)
+results4 = results_of_algorithm(Algorithm_v2, trials= trialx)
 summaryTable = PrettyTable()
 summaryTable.field_names = ["target","Algorithm v1 Old", "Algorithm v1", "Algorithm v2 Old", "Algorithm v2"]
 for target in results1:
