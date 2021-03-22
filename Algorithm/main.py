@@ -8,7 +8,7 @@ from sklearn.cluster import MiniBatchKMeans
 import time
 from prettytable import PrettyTable # python -m pip install -U prettytable
 
-# Algo v2 with layering that is seperated even if color is similar. includes kmeans 
+# Algo v2 with layering that is seperated even if color is similar. includes kmeans (Est T(kmean + 3*idArr + 4*idMap))
 class Algorithm_v2:
 
     # initializes class variables / paths
@@ -471,7 +471,7 @@ class Algorithm_v2:
     def getColorMap(self) -> dict:
         return self.idColorMap
 
-#inefficient version
+#inefficient version of Algo v2  (Est T(kmean + idArr*idMap + 2idArr + 3idMap ))
 class Algorithm_v2_old:
 
     # initializes class variables / paths
@@ -930,7 +930,7 @@ class Algorithm_v2_old:
     def getColorMap(self) -> dict:
         return self.idColorMap
 
-#First version with Kmeans
+#First version with Kmeans (Est T(kmean + idMap))
 class Algorithm_v1:
 
     # initializes class variables / paths
@@ -1219,7 +1219,7 @@ class Algorithm_v1:
     def getColorMap(self) -> dict:
         return self.idColorMap
 
-#First Version
+#First Version from github before 3/21/2021 (Est T(idMap))
 class Algorithm_v1_old:
 
     # initializes class variables / paths
