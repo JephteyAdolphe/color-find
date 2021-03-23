@@ -88,8 +88,14 @@ class _DrawingBlockState extends State<DrawingBlock> {
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
-            selectedLayer = dummyLayers(details.localPosition.dy
-              ,details.localPosition.dx);
+            if(globals.imageLoaded)
+            {
+              var selecteddy = details.localPosition.dy*(int.parse(globals.loadedImage.row)/globals.drawHeight);
+              var selecteddx = details.localPosition.dx*(int.parse(globals.loadedImage.column)/globals.drawWidth);
+              selectedLayer = globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+            }
+            else
+              selectedLayer = dummyLayers(details.localPosition.dy,details.localPosition.dx);
             //Debug
             print("Selected Layer:");
             print(selectedLayer);
@@ -103,20 +109,27 @@ class _DrawingBlockState extends State<DrawingBlock> {
                 point: details.localPosition,
                 colorRecord: Paint()
                   ..color = globals.activeColor
-                  ..strokeWidth = 2
+                  ..strokeWidth = globals.strokeSize
                   ..strokeCap = StrokeCap.round));
           });
         },
         onPanUpdate: (details) {
           this.setState(() {
-            tempLayer = dummyLayers(details.localPosition.dy
-                ,details.localPosition.dx);
+            if(globals.imageLoaded)
+            {
+              var selecteddy = details.localPosition.dy*(int.parse(globals.loadedImage.row)/globals.drawHeight);
+              var selecteddx = details.localPosition.dx*(int.parse(globals.loadedImage.column)/globals.drawWidth);
+              tempLayer = globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+            }
+            else
+              tempLayer = dummyLayers(details.localPosition.dy,details.localPosition.dx);
+
             if (tempLayer == selectedLayer)
               globals.records.add(globals.ColorRecord(
                   point: details.localPosition,
                   colorRecord: Paint()
                     ..color = globals.activeColor
-                    ..strokeWidth = 2
+                    ..strokeWidth = globals.strokeSize
                     ..strokeCap = StrokeCap.round));
             else globals.records.add(null);
           });

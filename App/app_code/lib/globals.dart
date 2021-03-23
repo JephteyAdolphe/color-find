@@ -16,17 +16,18 @@ import 'package:flutter/services.dart' show rootBundle;
 //
 List<ColorRecord> records = []; //record of all colors
 Color activeColor = Colors.black26; //globally selected/current color
+double strokeSize = 4; //size of the stroke
 
-PictureRecorder recorder = new PictureRecorder();
-Canvas canvas = new Canvas(recorder);
-bool recorderInserted = false;
+PictureRecorder recorder = new PictureRecorder(); //records canvas draws
+Canvas canvas = new Canvas(recorder); // canvas
+bool recorderInserted = false; // check
 
 // screen sizing
-var screenW;
-var screenH;
-var appBarH;
-var drawWidth;
-var drawHeight;
+var screenW;// Total screen width
+var screenH;// Total screen height
+var appBarH;// appBar height
+var drawWidth;// Canvas Width limiter
+var drawHeight;// Canvas Height limiter
 
 void setCanvasSize() {
   drawHeight =
@@ -83,6 +84,7 @@ class Counter {
 
 //Create Image Class
 Image loadedImage = new Image();
+bool imageLoaded = false;
 
 void fetchFileData(String id) async {
   //START
@@ -128,6 +130,7 @@ void fetchFileData(String id) async {
   }
   x.cntr = 0;
   //END
+  imageLoaded = true;
 }
 
 // Saving images
