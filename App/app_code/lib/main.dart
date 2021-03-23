@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:app_code/palette.dart';
 import 'menu.dart';
@@ -10,9 +11,11 @@ import 'globals.dart' as globals;
 int selectedLayer = -1;
 int tempLayer = -1;
 //Prototype
-int getLayer(targetWidth,targetHeight) {
-  return globals.loadedImage.matrix[targetWidth.floor()][targetHeight.floor()].value; //works if same size
+int getLayer(targetWidth, targetHeight) {
+  return globals.loadedImage.matrix[targetWidth.floor()][targetHeight.floor()]
+      .value; //works if same size
 }
+
 //Dummy Layers
 /*
 1 | 4
@@ -21,18 +24,20 @@ int getLayer(targetWidth,targetHeight) {
 -----
 3 | 6
 */
-int dummyLayers(selectedHeight,selectedWidth) {
+int dummyLayers(selectedHeight, selectedWidth) {
   var dummyHeight = globals.drawHeight;
   var dummyHLayers = 3;
-  var dummyHSeg = dummyHeight/dummyHLayers;
+  var dummyHSeg = dummyHeight / dummyHLayers;
   var dummyWidth = globals.drawWidth;
   var dummyWLayers = 2;
-  var dummyWSeg = dummyWidth/dummyWLayers;
-  for(int heightLayer = 1; heightLayer <= dummyHLayers; heightLayer++){
-    for(int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++){
-      if(selectedWidth < dummyWSeg*widthLayer + 1) {
-        if(selectedHeight < dummyHSeg*heightLayer + 1) {
-          return heightLayer + dummyHLayers*(widthLayer - 1); // just a dummy segmentation of equal sizes
+  var dummyWSeg = dummyWidth / dummyWLayers;
+  for (int heightLayer = 1; heightLayer <= dummyHLayers; heightLayer++) {
+    for (int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++) {
+      if (selectedWidth < dummyWSeg * widthLayer + 1) {
+        if (selectedHeight < dummyHSeg * heightLayer + 1) {
+          return heightLayer +
+              dummyHLayers *
+                  (widthLayer - 1); // just a dummy segmentation of equal sizes
         }
       }
     }
@@ -42,7 +47,15 @@ int dummyLayers(selectedHeight,selectedWidth) {
 // Maybe find a way to import widgets from separate files so that theres not too much code in this main one
 
 void main() {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+    [
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ],
+  ).then((val) {
+    runApp(MyApp());
+  });
 }
 
 // Main app where everything will be displayed
@@ -88,14 +101,16 @@ class _DrawingBlockState extends State<DrawingBlock> {
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
-            if(globals.imageLoaded)
-            {
-              var selecteddy = details.localPosition.dy*(int.parse(globals.loadedImage.row)/globals.drawHeight);
-              var selecteddx = details.localPosition.dx*(int.parse(globals.loadedImage.column)/globals.drawWidth);
-              selectedLayer = globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
-            }
-            else
-              selectedLayer = dummyLayers(details.localPosition.dy,details.localPosition.dx);
+            if (globals.imageLoaded) {
+              var selecteddy = details.localPosition.dy *
+                  (int.parse(globals.loadedImage.row) / globals.drawHeight);
+              var selecteddx = details.localPosition.dx *
+                  (int.parse(globals.loadedImage.column) / globals.drawWidth);
+              selectedLayer = globals.loadedImage
+                  .matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+            } else
+              selectedLayer = dummyLayers(
+                  details.localPosition.dy, details.localPosition.dx);
             //Debug
             print("Selected Layer:");
             print(selectedLayer);
@@ -115,14 +130,16 @@ class _DrawingBlockState extends State<DrawingBlock> {
         },
         onPanUpdate: (details) {
           this.setState(() {
-            if(globals.imageLoaded)
-            {
-              var selecteddy = details.localPosition.dy*(int.parse(globals.loadedImage.row)/globals.drawHeight);
-              var selecteddx = details.localPosition.dx*(int.parse(globals.loadedImage.column)/globals.drawWidth);
-              tempLayer = globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
-            }
-            else
-              tempLayer = dummyLayers(details.localPosition.dy,details.localPosition.dx);
+            if (globals.imageLoaded) {
+              var selecteddy = details.localPosition.dy *
+                  (int.parse(globals.loadedImage.row) / globals.drawHeight);
+              var selecteddx = details.localPosition.dx *
+                  (int.parse(globals.loadedImage.column) / globals.drawWidth);
+              tempLayer = globals.loadedImage
+                  .matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+            } else
+              tempLayer = dummyLayers(
+                  details.localPosition.dy, details.localPosition.dx);
 
             if (tempLayer == selectedLayer)
               globals.records.add(globals.ColorRecord(
@@ -131,7 +148,8 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     ..color = globals.activeColor
                     ..strokeWidth = globals.strokeSize
                     ..strokeCap = StrokeCap.round));
-            else globals.records.add(null);
+            else
+              globals.records.add(null);
           });
         },
         onPanEnd: (details) {
@@ -156,7 +174,8 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     children: [
                       Expanded(
                         child: Container(
-                            color: const Color(0xffffff).withOpacity(0)), // used to create a box for GestureDetector
+                            color: const Color(0xffffff).withOpacity(
+                                0)), // used to create a box for GestureDetector
                       ),
                     ],
                   ),
