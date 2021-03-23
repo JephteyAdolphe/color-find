@@ -1,2 +1,4 @@
 ball.jpg
 dog.png
+mario.png
+sonic.png
