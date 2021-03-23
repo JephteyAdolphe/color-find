@@ -1468,9 +1468,8 @@ class Algorithm_v1_old:
     def getColorMap(self) -> dict:
         return self.idColorMap
 
-def normalRun(Algorithm, itemUpdate = True, itemExists = False, BW_enable = True, kmeansDefault = 5, imageShow = False):
+def normalRun(Algorithm, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = False):
     # itemUpdate    : Update existing item
-    # itemExists    : Item has been processed name-wise before
     # BW_enable     : Special condition to attempt to merge similar greys/blacks/whites together
     # kmeansDefault : Default kmeans value
     # imageShow     : Show results visually, currently only does 1 image at a time
@@ -1508,6 +1507,7 @@ def normalRun(Algorithm, itemUpdate = True, itemExists = False, BW_enable = True
     rows = len(targets)
     times = {}
     # Start
+    itemExists = False # Item has been processed name-wise before
     for target in targets:
         startTime = time.time()
         imgNum += 1
@@ -1563,7 +1563,7 @@ def normalRun(Algorithm, itemUpdate = True, itemExists = False, BW_enable = True
 def results_of_algorithm(Algorithm, trials = 1):
     data = []
     for i in range(trials):
-        data.append(normalRun(Algorithm, itemUpdate = True, itemExists = False, BW_enable = True, kmeansDefault = 5, imageShow = False))
+        data.append(normalRun(Algorithm, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = False))
     results = {}
     for i in range(trials):
         for target in data[i]:
@@ -1580,12 +1580,13 @@ ball = Algorithm("./ball.jpg", 3, 200, 200, 3, True)
 ball.updateExport()
 plt.imshow(ball.idToRGB())
 plt.show()
+normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = False)
 '''
 trialx = 25
-results1 = results_of_algorithm(Algorithm_v1_old, trials= trialx)
-results2 = results_of_algorithm(Algorithm_v1, trials= trialx)
-results3 = results_of_algorithm(Algorithm_v2_old, trials= trialx)
-results4 = results_of_algorithm(Algorithm_v2, trials= trialx)
+results1 = results_of_algorithm(Algorithm_v1_old,   trials= trialx)
+results2 = results_of_algorithm(Algorithm_v1,       trials= trialx)
+results3 = results_of_algorithm(Algorithm_v2_old,   trials= trialx)
+results4 = results_of_algorithm(Algorithm_v2,       trials= trialx)
 summaryTable = PrettyTable()
 summaryTable.field_names = ["target","Algorithm v1 Old", "Algorithm v1", "Algorithm v2 Old", "Algorithm v2"]
 for target in results1:
