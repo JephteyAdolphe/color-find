@@ -424,7 +424,7 @@ class Algorithm_v2:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__path.split(".")[-1].split("/")[-1]))
+                appen.write(str(self.__path.split("/")[-1].split(".")[0]))
 
     def saveColumnTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
@@ -441,7 +441,7 @@ class Algorithm_v2:
     def saveidArrTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/layerMatrix.txt"
         if not os.path.isfile(txtFile):
-            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
+            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",", newline=',')
 
     def saveidColorMapTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/colorMap.txt"
@@ -883,7 +883,7 @@ class Algorithm_v2_old:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__path.split(".")[-1].split("/")[-1]))
+                appen.write(str(self.__path.split("/")[-1].split(".")[0]))
 
     def saveColumnTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
@@ -1172,7 +1172,7 @@ class Algorithm_v1:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__path.split(".")[1].split("/")[-1]))
+                appen.write(str(self.__path.split("/")[-1].split(".")[0]))
 
     def saveColumnTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
@@ -1421,7 +1421,7 @@ class Algorithm_v1_old:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__path.split(".")[1].split("/")[2]))
+                appen.write(str(self.__path.split("/")[-1].split(".")[0]))
 			
     def saveColumnTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
@@ -1576,10 +1576,11 @@ def results_of_algorithm(Algorithm, trials = 1):
     return results
 
 '''
-ball = Algorithm("./ball.jpg", 3, 200, 200, 3, True)
+ball = Algorithm_v2("./ball.jpg", 5, 200, 200, 3, True)
 ball.updateExport()
 plt.imshow(ball.idToRGB())
 plt.show()
+'''
 normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = False)
 '''
 trialx = 25
@@ -1593,3 +1594,4 @@ for target in results1:
     summaryTable.add_row([str(target),results1[target],results2[target],results3[target],results4[target]])
 print("Average Time per Algorithm for each image:")
 print(summaryTable)
+'''
