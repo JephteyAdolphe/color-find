@@ -23,6 +23,7 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.fetchFileData("0");
+            globals.records.clear();
             //print(globals.loadedImage.title);
             Navigator.pop(context);
           },
@@ -32,6 +33,7 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.fetchFileData("1");
+            globals.records.clear();
             Navigator.pop(context);
           },
         ),
