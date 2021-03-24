@@ -8,15 +8,19 @@ import 'menu.dart';
 import 'canvas.dart';
 import 'globals.dart' as globals;
 
-int selectedLayer = -1;
-int tempLayer = -1;
+int selectedLayer = -1; // which layer is selected
+int tempLayer = -1; // new layer to compare.
+bool lastNull = false; // check if one null has been inserted -> reducing load
 
-int getLayer(targetWidth, targetHeight)
-{
-  var selecteddy = targetHeight * (int.parse(globals.loadedImage.row) / globals.drawHeight);
-  var selecteddx = targetWidth * (int.parse(globals.loadedImage.column) / globals.drawWidth);
-  return globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+int getLayer(targetWidth, targetHeight) {
+  var selecteddy =
+      targetHeight * (int.parse(globals.loadedImage.row) / globals.drawHeight);
+  var selecteddx =
+      targetWidth * (int.parse(globals.loadedImage.column) / globals.drawWidth);
+  return globals
+      .loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
 }
+
 //Dummy Layers
 /*
 1 | 4
@@ -103,7 +107,8 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanDown: (details) {
           this.setState(() {
             if (globals.imageLoaded) {
-              selectedLayer = getLayer(details.localPosition.dx,details.localPosition.dy);
+              selectedLayer =
+                  getLayer(details.localPosition.dx, details.localPosition.dy);
             } else
               selectedLayer = dummyLayers(
                   details.localPosition.dy, details.localPosition.dx);
@@ -127,27 +132,38 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanUpdate: (details) {
           this.setState(() {
             if (globals.imageLoaded) {
-              tempLayer = getLayer(details.localPosition.dx,details.localPosition.dy);
+              tempLayer =
+                  getLayer(details.localPosition.dx, details.localPosition.dy);
             } else
               tempLayer = dummyLayers(
                   details.localPosition.dy, details.localPosition.dx);
 
-            if (tempLayer == selectedLayer)
+            if (tempLayer == selectedLayer) {
+              lastNull = false;
               globals.records.add(globals.ColorRecord(
                   point: details.localPosition,
                   colorRecord: Paint()
                     ..color = globals.activeColor
                     ..strokeWidth = globals.strokeSize
                     ..strokeCap = StrokeCap.round));
-            else
-              globals.records.add(null);
+            } else {
+              if (lastNull) {
+              } else {
+                lastNull = true; // only 1 null in a row.
+                globals.records.add(null); // cuts line
+              }
+            }
           });
         },
         onPanEnd: (details) {
           this.setState(() {
             selectedLayer = -1; // where deselect a layer
             tempLayer = -1; // deselect
-            globals.records.add(null);
+            if (lastNull) {
+              lastNull = false; // clear
+            } else {
+              globals.records.add(null); // cuts line
+            }
           });
         },
         child: Stack(
