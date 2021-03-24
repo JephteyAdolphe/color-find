@@ -419,24 +419,24 @@ class Algorithm_v2:
         self.saveidArrTxt()
         self.saveidColorMapTxt()
         self.saveNumLayerTxt()
-
+	
     def saveTitleTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
                 appen.write(str(self.__path.split("/")[-1].split(".")[0]))
-
+			
     def saveColumnTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__width))
-
+                appen.write(str(self.getDimensions()[1]))
+			
     def saveRowTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/row.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.__height))
+                appen.write(str(self.getDimensions()[0]))
 
     def saveidArrTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/layerMatrix.txt"
@@ -449,7 +449,7 @@ class Algorithm_v2:
             for _, values in self.idColorMap.items():
                 a = np.array(values[1])
                 with open(txtFile, "ab") as appen:
-                    np.savetxt(appen, a.reshape(1, a.shape[0]), fmt="%d", delimiter=",")
+                    np.savetxt(appen, a.reshape(1,a.shape[0]), fmt="%d", delimiter=",")
 
     def saveNumLayerTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/numLayer.txt"

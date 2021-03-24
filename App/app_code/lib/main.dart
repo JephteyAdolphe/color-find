@@ -10,12 +10,13 @@ import 'globals.dart' as globals;
 
 int selectedLayer = -1;
 int tempLayer = -1;
-//Prototype
-int getLayer(targetWidth, targetHeight) {
-  return globals.loadedImage.matrix[targetWidth.floor()][targetHeight.floor()]
-      .value; //works if same size
-}
 
+int getLayer(targetWidth, targetHeight)
+{
+  var selecteddy = targetHeight * (int.parse(globals.loadedImage.row) / globals.drawHeight);
+  var selecteddx = targetWidth * (int.parse(globals.loadedImage.column) / globals.drawWidth);
+  return globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+}
 //Dummy Layers
 /*
 1 | 4
@@ -102,12 +103,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanDown: (details) {
           this.setState(() {
             if (globals.imageLoaded) {
-              var selecteddy = details.localPosition.dy *
-                  (int.parse(globals.loadedImage.row) / globals.drawHeight);
-              var selecteddx = details.localPosition.dx *
-                  (int.parse(globals.loadedImage.column) / globals.drawWidth);
-              selectedLayer = globals.loadedImage
-                  .matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+              selectedLayer = getLayer(details.localPosition.dx,details.localPosition.dy);
             } else
               selectedLayer = dummyLayers(
                   details.localPosition.dy, details.localPosition.dx);
@@ -115,9 +111,9 @@ class _DrawingBlockState extends State<DrawingBlock> {
             print("Selected Layer:");
             print(selectedLayer);
             print("Local Position Y:");
-            print(details.globalPosition.dy);
+            print(details.localPosition.dy);
             print("Local Position X:");
-            print(details.globalPosition.dx);
+            print(details.localPosition.dx);
             //
             globals.records.add(globals.ColorRecord(
                 // [1 , 2 ; 1 , 0]
@@ -131,12 +127,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
         onPanUpdate: (details) {
           this.setState(() {
             if (globals.imageLoaded) {
-              var selecteddy = details.localPosition.dy *
-                  (int.parse(globals.loadedImage.row) / globals.drawHeight);
-              var selecteddx = details.localPosition.dx *
-                  (int.parse(globals.loadedImage.column) / globals.drawWidth);
-              tempLayer = globals.loadedImage
-                  .matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+              tempLayer = getLayer(details.localPosition.dx,details.localPosition.dy);
             } else
               tempLayer = dummyLayers(
                   details.localPosition.dy, details.localPosition.dx);

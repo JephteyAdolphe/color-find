@@ -41,6 +41,7 @@ void printCanvasSize() {
   print(appBarH);
   print(drawHeight);
   print(drawWidth);
+
 }
 
 List<double> getCanvasSize() {
