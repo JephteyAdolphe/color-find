@@ -12,13 +12,20 @@ int selectedLayer = -1; // which layer is selected
 int tempLayer = -1; // new layer to compare.
 bool lastNull = false; // check if one null has been inserted -> reducing load
 
-int getLayer(targetWidth, targetHeight) {
-  var selecteddy =
-      targetHeight * (int.parse(globals.loadedImage.row) / globals.drawHeight);
-  var selecteddx =
-      targetWidth * (int.parse(globals.loadedImage.column) / globals.drawWidth);
+int getLayer(targetWidth, targetHeight) { // rescales given position and Layering Matrix to the canvas size
+  int matrixHeight = int.parse(globals.loadedImage.row);
+  int matrixWidth = int.parse(globals.loadedImage.column);
+  var selectedDY =
+      targetHeight * (matrixHeight / globals.drawHeight);
+  var selectedDX =
+      targetWidth * (matrixWidth / globals.drawWidth);
+  if(selectedDY > matrixHeight || selectedDX > matrixWidth
+      || selectedDX < 0 || selectedDY < 0)
+  { // if it is bigger or negative then matrix size return -1 for null
+    return -1;
+  }
   return globals
-      .loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+      .loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()].value;
 }
 
 //Dummy Layers
