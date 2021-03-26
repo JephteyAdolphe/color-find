@@ -3,7 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'dart:io';
-import 'dart:async';
+//import 'dart:async';
 
 _write(String text) async {
   final Directory directory = await getApplicationDocumentsDirectory();
@@ -78,9 +78,10 @@ class FormScreenState extends State<FormScreen> {
 
   Widget _buildQuestionTwo() {
     return TextFormField(
+      maxLines: 2,
       decoration: InputDecoration(
           labelText:
-          'Before your ColorFind session, how would you rate your stress levels?',
+          'Before your ColorFind session, how would you\nrate your stress levels?',
           helperText:
           'Please enter a number from 1 to 10.'),
       maxLength: 2,
@@ -99,9 +100,10 @@ class FormScreenState extends State<FormScreen> {
 
   Widget _buildQuestionThree() {
     return TextFormField(
+      maxLines:2,
       decoration: InputDecoration(
           labelText:
-          'After your ColorFind session, how would you rate your stress levels?',
+          'After your ColorFind session, how would you\nrate your stress levels?',
           helperText:
           'Please enter a number from 1 to 10.'),
       maxLength: 2,
