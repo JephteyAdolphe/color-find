@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'globals.dart' as globals;
 
+import 'form_screen.dart';
+
 // Hamburger Menu where we list our action buttons
 
 Widget getMenu(BuildContext context) {
@@ -55,7 +57,8 @@ Widget getMenu(BuildContext context) {
               context: context,
               builder: (context) => new AlertDialog(
                 title: new Text('Save & Clear'),
-                content: Text('Cleared but probably not saving, Check Android: data/com.exapmle.app_code'),
+                content: Text(
+                    'Cleared but probably not saving, Check Android: data/com.exapmle.app_code'),
                 actions: <Widget>[
                   new FlatButton(
                     onPressed: () {
@@ -118,6 +121,15 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.printCanvasSize();
+          },
+        ),
+        ListTile(
+          title: Text('Survey Form'),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FormScreen()),
+            );
           },
         ),
       ],
