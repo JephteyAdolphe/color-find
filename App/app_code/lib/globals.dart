@@ -16,7 +16,7 @@ import 'package:flutter/services.dart' show rootBundle;
 //
 List<ColorRecord> records = []; //record of all colors
 Color activeColor = Colors.black26; //globally selected/current color
-double strokeSize = 8; //size of the stroke
+double strokeSize = 4; //size of the stroke
 
 PictureRecorder recorder = new PictureRecorder(); //records canvas draws
 Canvas canvas = new Canvas(recorder); // canvas
@@ -41,7 +41,6 @@ void printCanvasSize() {
   print(appBarH);
   print(drawHeight);
   print(drawWidth);
-
 }
 
 List<double> getCanvasSize() {
@@ -49,10 +48,16 @@ List<double> getCanvasSize() {
 }
 
 class ColorRecord {
-  Offset point;
-  Paint colorRecord;
+  Offset point; //location
+  Paint colorRecord; //color
 
   ColorRecord({this.point, this.colorRecord});
+}
+
+void clear() {
+  records.clear(); //clear record of all colors
+  recorder = new PictureRecorder(); //new recorder
+  canvas = new Canvas(recorder); //new canvas
 }
 
 // GLD import
@@ -158,6 +163,7 @@ void saveImage() async {
   if (await Permission.location.isRestricted) {
     // The OS restricts access, for example because of parental controls.
   }
+  //get and create directory for ColorFind
   final directory = await getStorageDirectory();
   final myImagePath = '$directory' + '/ColorFind';
   print('$myImagePath');
@@ -165,20 +171,19 @@ void saveImage() async {
 
   print(myImagePath);
 
+  //Saving the image:
   final picture = recorder.endRecording();
-  print(picture.toString());
-  final img = await picture.toImage(400, 600); // REQUIRES DYNAMIC SIZE OF PHONE
+  final img = await picture.toImage(drawWidth, drawHeight); // REQUIRES DYNAMIC SIZE OF PHONE
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
-  recorder = new PictureRecorder();
-  canvas = new Canvas(recorder);
-  recorderInserted = false;
+  //setup new recorder
+  clear();
 
-  print('test2');
+  print('Image saving');
+  //save image
+  writeToFile(pngBytes, myImagePath + '/imgtest.png'); //needs to be dynamic saving.
 
-  writeToFile(pngBytes, myImagePath + '/imgtest.png');
-
-  print('test3');
+  print('image Saved');
 }
 
 Future<void> writeToFile(ByteData data, String path) {

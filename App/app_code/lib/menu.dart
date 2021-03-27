@@ -23,7 +23,7 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.fetchFileData("0");
-            globals.records.clear();
+            globals.clear();
             //print(globals.loadedImage.title);
             Navigator.pop(context);
           },
@@ -33,7 +33,7 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.fetchFileData("1");
-            globals.records.clear();
+            globals.clear();
             Navigator.pop(context);
           },
         ),
@@ -41,7 +41,7 @@ Widget getMenu(BuildContext context) {
           title: Text('Restart'),
           onTap: () {
             // Go to page
-            globals.records.clear();
+            globals.clear();
             Navigator.pop(context);
           },
         ),
@@ -50,12 +50,11 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.saveImage();
-            globals.records.clear();
             showDialog(
               context: context,
               builder: (context) => new AlertDialog(
                 title: new Text('Save & Clear'),
-                content: Text('Cleared but probably not saving, Check Android: data/com.exapmle.app_code'),
+                content: Text('Cleared and saved, Check Android: data/com.exapmle.app_code'),
                 actions: <Widget>[
                   new FlatButton(
                     onPressed: () {
