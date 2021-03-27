@@ -249,19 +249,6 @@ class MyPainter extends CustomPainter {
         canvas.drawPoints(PointMode.points, [points[x].point], paint);
       }
     }
-    tick++;
-    // Recording effect
-    globals.canvas.drawRect(rect, background);
-
-    for (int x = 0; x < points.length - 1; x++) {
-      if (points[x] != null && points[x + 1] != null) {
-        Paint paint = points[x].colorRecord;
-        globals.canvas.drawLine(points[x].point, points[x + 1].point, paint);
-      } else if (points[x] != null && points[x + 1] == null) {
-        Paint paint = points[x].colorRecord;
-        globals.canvas.drawPoints(PointMode.points, [points[x].point], paint);
-      }
-    }
   }
 
   @override

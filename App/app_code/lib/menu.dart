@@ -46,15 +46,38 @@ Widget getMenu(BuildContext context) {
           },
         ),
         ListTile(
-          title: Text('Save & Clear'),
+          title: Text('Save Image'),
           onTap: () {
             // Go to page
             globals.saveImage();
             showDialog(
               context: context,
               builder: (context) => new AlertDialog(
+                title: new Text('Save'),
+                content: Text('Saved, Check Android: data/com.exapmle.app_code/Files/ColorFind'),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // dismisses only the dialog and returns nothing
+                    },
+                    child: new Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        ListTile(
+          title: Text('Save Image & clear canvas'),
+          onTap: () {
+            // Go to page
+            globals.saveImage(clearRecords: true);
+            showDialog(
+              context: context,
+              builder: (context) => new AlertDialog(
                 title: new Text('Save & Clear'),
-                content: Text('Cleared and saved, Check Android: data/com.exapmle.app_code'),
+                content: Text('Saved and cleared, Check Android: data/com.exapmle.app_code/Files/ColorFind'),
                 actions: <Widget>[
                   new FlatButton(
                     onPressed: () {

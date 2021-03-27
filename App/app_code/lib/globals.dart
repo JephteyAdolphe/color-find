@@ -26,8 +26,8 @@ bool recorderInserted = false; // check
 var screenW;// Total screen width
 var screenH;// Total screen height
 var appBarH;// appBar height
-var drawWidth;// Canvas Width limiter
-var drawHeight;// Canvas Height limiter
+int drawWidth;// Canvas Width limiter
+int drawHeight;// Canvas Height limiter
 
 void setCanvasSize() {
   drawHeight =
@@ -44,7 +44,7 @@ void printCanvasSize() {
 }
 
 List<double> getCanvasSize() {
-  return [drawWidth, drawHeight];
+  return [drawWidth.toDouble(), drawHeight.toDouble()];
 }
 
 class ColorRecord {
@@ -55,6 +55,15 @@ class ColorRecord {
 }
 
 void clear() {
+  records.clear();
+}
+
+void recorderClear() {
+  recorder = new PictureRecorder(); //new recorder
+  canvas = new Canvas(recorder); //new canvas
+}
+
+void fullClear() {
   records.clear(); //clear record of all colors
   recorder = new PictureRecorder(); //new recorder
   canvas = new Canvas(recorder); //new canvas
@@ -149,7 +158,7 @@ Future<String> getStorageDirectory() async {
   }
 }
 
-void saveImage() async {
+void saveImage({clearRecords = false}) async {
   /*
   final directory2 = await getApplicationDocumentsDirectory();
   print('$directory2');
@@ -171,19 +180,39 @@ void saveImage() async {
 
   print(myImagePath);
 
+  print('drawing image');
+  //setup recorder with canvas and produce image:
+  Paint background = Paint()..color = Colors.white;
+  Rect rect = Rect.fromLTWH(0, 0, drawWidth.toDouble(), drawHeight.toDouble());
+  List<ColorRecord> points = records;
+  canvas.drawRect(rect, background);
+
+  for (int x = 0; x < points.length - 1; x++) {
+    if (points[x] != null && points[x + 1] != null) {
+      Paint paint = points[x].colorRecord;
+      canvas.drawLine(points[x].point, points[x + 1].point, paint);
+    } else if (points[x] != null && points[x + 1] == null) {
+      Paint paint = points[x].colorRecord;
+      canvas.drawPoints(PointMode.points, [points[x].point], paint);
+    }
+  }
+
   //Saving the image:
   final picture = recorder.endRecording();
   final img = await picture.toImage(drawWidth, drawHeight); // REQUIRES DYNAMIC SIZE OF PHONE
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
-
-  //setup new recorder
-  clear();
 
   print('Image saving');
   //save image
   writeToFile(pngBytes, myImagePath + '/imgtest.png'); //needs to be dynamic saving.
 
   print('image Saved');
+
+  //cleanup
+  recorderClear();
+  if (clearRecords) {
+    clear();
+  }
 }
 
 Future<void> writeToFile(ByteData data, String path) {
