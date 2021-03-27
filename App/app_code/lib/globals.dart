@@ -159,10 +159,7 @@ Future<String> getStorageDirectory() async {
 }
 
 void saveImage({clearRecords = false}) async {
-  /*
-  final directory2 = await getApplicationDocumentsDirectory();
-  print('$directory2');
-  */
+
   var imgPermission = await Permission.storage.status;
   if (imgPermission.isUndetermined) {
     print("");

@@ -7,8 +7,6 @@ import 'package:app_code/palette.dart';
 import 'menu.dart';
 import 'globals.dart' as globals;
 
-int tick = 0;
-
 int selectedLayer = -1; // which layer is selected
 int tempLayer = -1; // new layer to compare.
 int oldDY = -1; // old point no repeats -> reducing load
@@ -229,15 +227,10 @@ class MyPainter extends CustomPainter {
   List<globals.ColorRecord> points;
 
   MyPainter({this.points});
-  //Canvas asd = new Canvas(globals.recorder);
   @override
   void paint(Canvas canvas, Size size) {
     Paint background = Paint()..color = Colors.white;
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    //if (!globals.recorderInserted) {
-    //  globals.recorderInserted = true;
-    //  asd = new Canvas(globals.recorder);
-    //}
     canvas.drawRect(rect, background);
 
     for (int x = 0; x < points.length - 1; x++) {
