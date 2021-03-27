@@ -10,6 +10,8 @@ import 'globals.dart' as globals;
 
 int selectedLayer = -1; // which layer is selected
 int tempLayer = -1; // new layer to compare.
+int oldDY = -1;
+int oldDX = -1;
 bool lastNull = false; // check if one null has been inserted -> reducing load
 
 int getLayer(targetWidth, targetHeight) { // rescales given position and Layering Matrix to the canvas size
@@ -113,7 +115,9 @@ class _DrawingBlockState extends State<DrawingBlock> {
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
-            if (globals.imageLoaded) {
+            oldDX = details.localPosition.dx.toInt(); //record point position
+            oldDY = details.localPosition.dy.toInt();
+            if (globals.imageLoaded) { //Get layer at current position
               selectedLayer =
                   getLayer(details.localPosition.dx, details.localPosition.dy);
             } else
@@ -127,7 +131,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
             print("Local Position X:");
             print(details.localPosition.dx);
             //
-            globals.records.add(globals.ColorRecord(
+            globals.records.add(globals.ColorRecord( //add record.
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
                 colorRecord: Paint()
@@ -138,32 +142,39 @@ class _DrawingBlockState extends State<DrawingBlock> {
         },
         onPanUpdate: (details) {
           this.setState(() {
-            if (globals.imageLoaded) {
-              tempLayer =
-                  getLayer(details.localPosition.dx, details.localPosition.dy);
-            } else
-              tempLayer = dummyLayers(
-                  details.localPosition.dy, details.localPosition.dx);
+            if(oldDX != details.localPosition.dx.toInt() && oldDY != details.localPosition.dy.toInt()) {
+              //check if it is the same spot as before if so don't put a point.
+              if (globals.imageLoaded) { //Get layer at current position
+                tempLayer =
+                    getLayer(details.localPosition.dx, details.localPosition.dy);
+              } else
+                tempLayer = dummyLayers(
+                    details.localPosition.dy, details.localPosition.dx);
 
-            if (tempLayer == selectedLayer) {
-              lastNull = false;
-              globals.records.add(globals.ColorRecord(
-                  point: details.localPosition,
-                  colorRecord: Paint()
-                    ..color = globals.activeColor
-                    ..strokeWidth = globals.strokeSize
-                    ..strokeCap = StrokeCap.round));
-            } else {
-              if (lastNull) {
+              if (tempLayer == selectedLayer) { //check if layer at current position is the same as the selected layer
+                oldDX = details.localPosition.dx.toInt(); //record point position
+                oldDY = details.localPosition.dy.toInt();
+                lastNull = false; // this is non null point so reset last null
+                globals.records.add(globals.ColorRecord( //add record
+                    point: details.localPosition,
+                    colorRecord: Paint()
+                      ..color = globals.activeColor
+                      ..strokeWidth = globals.strokeSize
+                      ..strokeCap = StrokeCap.round));
               } else {
-                lastNull = true; // only 1 null in a row.
-                globals.records.add(null); // cuts line
+                if (lastNull) { //if the last point was not null then add null point and set lastnull
+                } else {
+                  lastNull = true; // only 1 null in a row.
+                  globals.records.add(null); // cuts line
+                }
               }
             }
           });
         },
         onPanEnd: (details) {
           this.setState(() {
+            oldDX = -1; //reset oldDX
+            oldDY = -1; //reset oldDY
             selectedLayer = -1; // where deselect a layer
             tempLayer = -1; // deselect
             if (lastNull) {

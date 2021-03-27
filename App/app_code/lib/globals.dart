@@ -16,7 +16,7 @@ import 'package:flutter/services.dart' show rootBundle;
 //
 List<ColorRecord> records = []; //record of all colors
 Color activeColor = Colors.black26; //globally selected/current color
-double strokeSize = 4; //size of the stroke
+double strokeSize = 8; //size of the stroke
 
 PictureRecorder recorder = new PictureRecorder(); //records canvas draws
 Canvas canvas = new Canvas(recorder); // canvas
