@@ -196,7 +196,7 @@ void saveImage({clearRecords = false}) async {
 
   //Saving the image:
   final picture = recorder.endRecording();
-  final img = await picture.toImage(drawWidth, drawHeight); // REQUIRES DYNAMIC SIZE OF PHONE
+  final img = await picture.toImage(drawWidth, drawHeight);
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
   print('Image saving');
