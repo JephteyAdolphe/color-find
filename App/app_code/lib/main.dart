@@ -5,18 +5,31 @@ import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:app_code/palette.dart';
 import 'menu.dart';
-import 'canvas.dart';
 import 'globals.dart' as globals;
 
-int selectedLayer = -1;
-int tempLayer = -1;
+int selectedLayer = -1; // which layer is selected
+int tempLayer = -1; // new layer to compare.
+int oldDY = -1; // old point no repeats -> reducing load
+int oldDX = -1;
+bool lastNull = false; // check if one null has been inserted -> reducing load
 
-int getLayer(targetWidth, targetHeight)
-{
-  var selecteddy = targetHeight * (int.parse(globals.loadedImage.row) / globals.drawHeight);
-  var selecteddx = targetWidth * (int.parse(globals.loadedImage.column) / globals.drawWidth);
-  return globals.loadedImage.matrix[selecteddy.toInt()][selecteddx.toInt()].value;
+int getLayer(targetWidth, targetHeight) {
+  // rescales given position and Layering Matrix to the canvas size
+  int matrixHeight = int.parse(globals.loadedImage.row);
+  int matrixWidth = int.parse(globals.loadedImage.column);
+  var selectedDY = targetHeight * (matrixHeight / globals.drawHeight);
+  var selectedDX = targetWidth * (matrixWidth / globals.drawWidth);
+  if (selectedDY > matrixHeight ||
+      selectedDX > matrixWidth ||
+      selectedDX < 0 ||
+      selectedDY < 0) {
+    // if it is bigger or negative then matrix size return -1 for null
+    return -1;
+  }
+  return globals
+      .loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()].value;
 }
+
 //Dummy Layers
 /*
 1 | 4
@@ -36,9 +49,8 @@ int dummyLayers(selectedHeight, selectedWidth) {
     for (int widthLayer = 1; widthLayer <= dummyWLayers; widthLayer++) {
       if (selectedWidth < dummyWSeg * widthLayer + 1) {
         if (selectedHeight < dummyHSeg * heightLayer + 1) {
-          return heightLayer +
-              dummyHLayers *
-                  (widthLayer - 1); // just a dummy segmentation of equal sizes
+          return heightLayer + dummyHLayers * (widthLayer - 1);
+          // just a dummy segmentation of equal sizes
         }
       }
     }
@@ -90,6 +102,7 @@ class DrawingBlock extends StatefulWidget {
 class _DrawingBlockState extends State<DrawingBlock> {
   @override
   Widget build(BuildContext context) {
+    // get screen sizes to rescale image to canvas
     globals.screenH = MediaQuery.of(context).size.height;
     globals.screenW = MediaQuery.of(context).size.width;
     globals.appBarH = AppBar().preferredSize.height;
@@ -102,8 +115,12 @@ class _DrawingBlockState extends State<DrawingBlock> {
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
+            oldDX = details.localPosition.dx.toInt(); //record point position
+            oldDY = details.localPosition.dy.toInt();
             if (globals.imageLoaded) {
-              selectedLayer = getLayer(details.localPosition.dx,details.localPosition.dy);
+              //Get layer at current position
+              selectedLayer =
+                  getLayer(details.localPosition.dx, details.localPosition.dy);
             } else
               selectedLayer = dummyLayers(
                   details.localPosition.dy, details.localPosition.dx);
@@ -116,6 +133,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
             print(details.localPosition.dx);
             //
             globals.records.add(globals.ColorRecord(
+                //add record.
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
                 colorRecord: Paint()
@@ -126,28 +144,52 @@ class _DrawingBlockState extends State<DrawingBlock> {
         },
         onPanUpdate: (details) {
           this.setState(() {
-            if (globals.imageLoaded) {
-              tempLayer = getLayer(details.localPosition.dx,details.localPosition.dy);
-            } else
-              tempLayer = dummyLayers(
-                  details.localPosition.dy, details.localPosition.dx);
+            if (oldDX != details.localPosition.dx.toInt() &&
+                oldDY != details.localPosition.dy.toInt()) {
+              //check if it is the same spot as before if so don't put a point.
+              if (globals.imageLoaded) {
+                //Get layer at current position
+                tempLayer = getLayer(
+                    details.localPosition.dx, details.localPosition.dy);
+              } else
+                tempLayer = dummyLayers(
+                    details.localPosition.dy, details.localPosition.dx);
 
-            if (tempLayer == selectedLayer)
-              globals.records.add(globals.ColorRecord(
-                  point: details.localPosition,
-                  colorRecord: Paint()
-                    ..color = globals.activeColor
-                    ..strokeWidth = globals.strokeSize
-                    ..strokeCap = StrokeCap.round));
-            else
-              globals.records.add(null);
+              if (tempLayer == selectedLayer) {
+                //check if layer at current position is the same as the selected layer
+                oldDX =
+                    details.localPosition.dx.toInt(); //record point position
+                oldDY = details.localPosition.dy.toInt();
+                lastNull = false; // this is non null point so reset last null
+                globals.records.add(globals.ColorRecord(
+                    //add record
+                    point: details.localPosition,
+                    colorRecord: Paint()
+                      ..color = globals.activeColor
+                      ..strokeWidth = globals.strokeSize
+                      ..strokeCap = StrokeCap.round));
+              } else {
+                if (lastNull) {
+                  //if the last point was not null then add null point and set lastnull
+                } else {
+                  lastNull = true; // only 1 null in a row.
+                  globals.records.add(null); // cuts line
+                }
+              }
+            }
           });
         },
         onPanEnd: (details) {
           this.setState(() {
+            oldDX = -1; //reset oldDX
+            oldDY = -1; //reset oldDY
             selectedLayer = -1; // where deselect a layer
             tempLayer = -1; // deselect
-            globals.records.add(null);
+            if (lastNull) {
+              lastNull = false; // clear
+            } else {
+              globals.records.add(null); // cuts line
+            }
           });
         },
         child: Stack(
@@ -185,15 +227,10 @@ class MyPainter extends CustomPainter {
   List<globals.ColorRecord> points;
 
   MyPainter({this.points});
-  //Canvas asd = new Canvas(globals.recorder);
   @override
   void paint(Canvas canvas, Size size) {
     Paint background = Paint()..color = Colors.white;
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    //if (!globals.recorderInserted) {
-    //  globals.recorderInserted = true;
-    //  asd = new Canvas(globals.recorder);
-    //}
     canvas.drawRect(rect, background);
 
     for (int x = 0; x < points.length - 1; x++) {
@@ -203,18 +240,6 @@ class MyPainter extends CustomPainter {
       } else if (points[x] != null && points[x + 1] == null) {
         Paint paint = points[x].colorRecord;
         canvas.drawPoints(PointMode.points, [points[x].point], paint);
-      }
-    }
-    // Recording effect
-    globals.canvas.drawRect(rect, background);
-
-    for (int x = 0; x < points.length - 1; x++) {
-      if (points[x] != null && points[x + 1] != null) {
-        Paint paint = points[x].colorRecord;
-        globals.canvas.drawLine(points[x].point, points[x + 1].point, paint);
-      } else if (points[x] != null && points[x + 1] == null) {
-        Paint paint = points[x].colorRecord;
-        globals.canvas.drawPoints(PointMode.points, [points[x].point], paint);
       }
     }
   }

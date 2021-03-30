@@ -25,7 +25,7 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.fetchFileData("0");
-            globals.records.clear();
+            globals.clear();
             //print(globals.loadedImage.title);
             Navigator.pop(context);
           },
@@ -35,7 +35,7 @@ Widget getMenu(BuildContext context) {
           onTap: () {
             // Go to page
             globals.fetchFileData("1");
-            globals.records.clear();
+            globals.clear();
             Navigator.pop(context);
           },
         ),
@@ -43,22 +43,43 @@ Widget getMenu(BuildContext context) {
           title: Text('Restart'),
           onTap: () {
             // Go to page
-            globals.records.clear();
+            globals.clear();
             Navigator.pop(context);
           },
         ),
         ListTile(
-          title: Text('Save & Clear'),
+          title: Text('Save Image'),
           onTap: () {
             // Go to page
             globals.saveImage();
-            globals.records.clear();
+            showDialog(
+              context: context,
+              builder: (context) => new AlertDialog(
+                title: new Text('Save'),
+                content: Text('Saved, Check Android: data/com.exapmle.app_code/Files/ColorFind'),
+                actions: <Widget>[
+                  new FlatButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop(); // dismisses only the dialog and returns nothing
+                    },
+                    child: new Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        ListTile(
+          title: Text('Save Image & clear canvas'),
+          onTap: () {
+            // Go to page
+            globals.saveImage(clearRecords: true);
             showDialog(
               context: context,
               builder: (context) => new AlertDialog(
                 title: new Text('Save & Clear'),
-                content: Text(
-                    'Cleared but probably not saving, Check Android: data/com.exapmle.app_code'),
+                content: Text('Saved and cleared, Check Android: data/com.exapmle.app_code/Files/ColorFind'),
                 actions: <Widget>[
                   new FlatButton(
                     onPressed: () {

@@ -26,8 +26,8 @@ bool recorderInserted = false; // check
 var screenW;// Total screen width
 var screenH;// Total screen height
 var appBarH;// appBar height
-var drawWidth;// Canvas Width limiter
-var drawHeight;// Canvas Height limiter
+int drawWidth;// Canvas Width limiter
+int drawHeight;// Canvas Height limiter
 
 void setCanvasSize() {
   drawHeight =
@@ -41,18 +41,32 @@ void printCanvasSize() {
   print(appBarH);
   print(drawHeight);
   print(drawWidth);
-
 }
 
 List<double> getCanvasSize() {
-  return [drawWidth, drawHeight];
+  return [drawWidth.toDouble(), drawHeight.toDouble()];
 }
 
 class ColorRecord {
-  Offset point;
-  Paint colorRecord;
+  Offset point; //location
+  Paint colorRecord; //color
 
   ColorRecord({this.point, this.colorRecord});
+}
+
+void clear() {
+  records.clear();
+}
+
+void recorderClear() {
+  recorder = new PictureRecorder(); //new recorder
+  canvas = new Canvas(recorder); //new canvas
+}
+
+void fullClear() {
+  records.clear(); //clear record of all colors
+  recorder = new PictureRecorder(); //new recorder
+  canvas = new Canvas(recorder); //new canvas
 }
 
 // GLD import
@@ -144,11 +158,8 @@ Future<String> getStorageDirectory() async {
   }
 }
 
-void saveImage() async {
-  /*
-  final directory2 = await getApplicationDocumentsDirectory();
-  print('$directory2');
-  */
+void saveImage({clearRecords = false}) async {
+
   var imgPermission = await Permission.storage.status;
   if (imgPermission.isUndetermined) {
     print("");
@@ -158,6 +169,7 @@ void saveImage() async {
   if (await Permission.location.isRestricted) {
     // The OS restricts access, for example because of parental controls.
   }
+  //get and create directory for ColorFind
   final directory = await getStorageDirectory();
   final myImagePath = '$directory' + '/ColorFind';
   print('$myImagePath');
@@ -165,20 +177,39 @@ void saveImage() async {
 
   print(myImagePath);
 
+  print('drawing image');
+  //setup recorder with canvas and produce image:
+  Paint background = Paint()..color = Colors.white;
+  Rect rect = Rect.fromLTWH(0, 0, drawWidth.toDouble(), drawHeight.toDouble());
+  List<ColorRecord> points = records;
+  canvas.drawRect(rect, background);
+
+  for (int x = 0; x < points.length - 1; x++) {
+    if (points[x] != null && points[x + 1] != null) {
+      Paint paint = points[x].colorRecord;
+      canvas.drawLine(points[x].point, points[x + 1].point, paint);
+    } else if (points[x] != null && points[x + 1] == null) {
+      Paint paint = points[x].colorRecord;
+      canvas.drawPoints(PointMode.points, [points[x].point], paint);
+    }
+  }
+
+  //Saving the image:
   final picture = recorder.endRecording();
-  print(picture.toString());
-  final img = await picture.toImage(400, 600); // REQUIRES DYNAMIC SIZE OF PHONE
+  final img = await picture.toImage(drawWidth, drawHeight);
   final pngBytes = await img.toByteData(format: ImageByteFormat.png);
 
-  recorder = new PictureRecorder();
-  canvas = new Canvas(recorder);
-  recorderInserted = false;
+  print('Image saving');
+  //save image
+  writeToFile(pngBytes, myImagePath + '/imgtest.png'); //needs to be dynamic saving.
 
-  print('test2');
+  print('image Saved');
 
-  writeToFile(pngBytes, myImagePath + '/imgtest.png');
-
-  print('test3');
+  //cleanup
+  recorderClear();
+  if (clearRecords) {
+    clear();
+  }
 }
 
 Future<void> writeToFile(ByteData data, String path) {
