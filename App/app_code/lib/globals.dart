@@ -9,7 +9,6 @@ import 'dart:typed_data';
 import 'package:permission_handler/permission_handler.dart';
 
 //import directives: Pavan
-import 'package:flutter/material.dart';
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -21,6 +20,9 @@ double strokeSize = 4; //size of the stroke
 PictureRecorder recorder = new PictureRecorder(); //records canvas draws
 Canvas canvas = new Canvas(recorder); // canvas
 bool recorderInserted = false; // check
+
+//List (ensures sections are colored in w/ same color)
+var selectedColors;
 
 // screen sizing
 var screenW;// Total screen width
@@ -122,6 +124,8 @@ void fetchFileData(String id) async {
   readRow = await rootBundle.loadString('assets/' + id + '/row.txt');
   readColumn = await rootBundle.loadString('assets/' + id + '/column.txt');
   readTitle = await rootBundle.loadString('assets/' + id + '/title.txt');
+
+  selectedColors = List<Color>.filled(int.parse(readNumLayer), null);
 
   //load text files into Image class
   loadedImage.layerMatrix = readLayerMatrix;

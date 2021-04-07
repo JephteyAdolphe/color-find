@@ -12,6 +12,7 @@ int tempLayer = -1; // new layer to compare.
 int oldDY = -1; // old point no repeats -> reducing load
 int oldDX = -1;
 bool lastNull = false; // check if one null has been inserted -> reducing load
+Color selectedColor; //color selected for current section
 
 int getLayer(targetWidth, targetHeight) {
   // rescales given position and Layering Matrix to the canvas size
@@ -121,6 +122,11 @@ class _DrawingBlockState extends State<DrawingBlock> {
               //Get layer at current position
               selectedLayer =
                   getLayer(details.localPosition.dx, details.localPosition.dy);
+              //set selected color to selected layer
+              if (globals.selectedColors[selectedLayer] == null) {
+                selectedColor = globals.activeColor;
+                globals.selectedColors[selectedLayer] = selectedColor;
+              }
             } else
               selectedLayer = dummyLayers(
                   details.localPosition.dy, details.localPosition.dx);
@@ -137,7 +143,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                 // [1 , 2 ; 1 , 0]
                 point: details.localPosition,
                 colorRecord: Paint()
-                  ..color = globals.activeColor
+                  ..color = globals.selectedColors[selectedLayer]
                   ..strokeWidth = globals.strokeSize
                   ..strokeCap = StrokeCap.round));
           });
@@ -165,7 +171,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     //add record
                     point: details.localPosition,
                     colorRecord: Paint()
-                      ..color = globals.activeColor
+                      ..color = globals.selectedColors[selectedLayer]
                       ..strokeWidth = globals.strokeSize
                       ..strokeCap = StrokeCap.round));
               } else {
