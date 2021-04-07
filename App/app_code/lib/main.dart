@@ -13,6 +13,7 @@ int oldDY = -1; // old point no repeats -> reducing load
 int oldDX = -1;
 bool lastNull = false; // check if one null has been inserted -> reducing load
 Color selectedColor; //color selected for current section
+bool dummyMode = false; // using dummyLayering
 
 int getLayer(targetWidth, targetHeight) {
   // rescales given position and Layering Matrix to the canvas size
@@ -122,30 +123,39 @@ class _DrawingBlockState extends State<DrawingBlock> {
               //Get layer at current position
               selectedLayer =
                   getLayer(details.localPosition.dx, details.localPosition.dy);
+              dummyMode = false;
+            } else {
+              selectedLayer = dummyLayers(
+                  details.localPosition.dy, details.localPosition.dx);
+              dummyMode = true;
+            }
+            if (selectedLayer != -1) //  if it a valid layer
+            {
               //set selected color to selected layer
-              if (globals.selectedColors[selectedLayer] == null) {
+              if (!dummyMode && globals.selectedColors[selectedLayer] == null) {
                 selectedColor = globals.activeColor;
                 globals.selectedColors[selectedLayer] = selectedColor;
               }
-            } else
-              selectedLayer = dummyLayers(
-                  details.localPosition.dy, details.localPosition.dx);
-            //Debug
-            print("Selected Layer:");
-            print(selectedLayer);
-            print("Local Position Y:");
-            print(details.localPosition.dy);
-            print("Local Position X:");
-            print(details.localPosition.dx);
-            //
-            globals.records.add(globals.ColorRecord(
-                //add record.
-                // [1 , 2 ; 1 , 0]
-                point: details.localPosition,
-                colorRecord: Paint()
-                  ..color = globals.selectedColors[selectedLayer]
-                  ..strokeWidth = globals.strokeSize
-                  ..strokeCap = StrokeCap.round));
+              //Debug
+              print("Selected Layer:");
+              print(selectedLayer);
+              print("Local Position Y:");
+              print(details.localPosition.dy);
+              print("Local Position X:");
+              print(details.localPosition.dx);
+              //
+              globals.records.add(globals.ColorRecord(
+                  //add record.
+                  // [1 , 2 ; 1 , 0]
+                  point: details.localPosition,
+                  colorRecord: Paint()
+                    ..color = dummyMode ? globals.activeColor : globals.selectedColors[selectedLayer]
+                    ..strokeWidth = globals.strokeSize
+                    ..strokeCap = StrokeCap.round));
+            } else {
+              selectedLayer =
+                  -2; // This will stop it from drawing anything if selectedLayer = -1
+            }
           });
         },
         onPanUpdate: (details) {
@@ -171,7 +181,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     //add record
                     point: details.localPosition,
                     colorRecord: Paint()
-                      ..color = globals.selectedColors[selectedLayer]
+                      ..color = dummyMode ? globals.activeColor : globals.selectedColors[selectedLayer]
                       ..strokeWidth = globals.strokeSize
                       ..strokeCap = StrokeCap.round));
               } else {
