@@ -2,19 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from PIL import Image, ImageFilter
-import mysql.connector
-from mysql.connector import errorcode
+import copy
 import cv2
 from sklearn.cluster import MiniBatchKMeans
+import time
+# from prettytable import PrettyTable # python -m pip install -U prettytable
 
-
-# Algo v2 with layering that is seperated even if color is similar. includes kmeans (Est T(kmean + 3*idArr + 4*idMap))
-class Algorithm_v2:
+# inefficient version of Algo v2  (Est T(kmean + idArr*idMap + 2idArr + 3idMap ))
+class Algorithm_v2_old:
 
     # initializes class variables / paths
-    def __init__(self, path: str, id: int, width=200, height=200, kvalue = 3, BW_enable = True) -> None:
+    def __init__(self, path: str, id: int, width=200, height=200, kvalue=3, BW_enable=True) -> None:
         try:
-            self.__img = self.kmeans(path,height,width,kvalue)
+            self.__img = self.kmeans(path, height, width, kvalue)
             self.__path = path
             self.__id = id
             self.__width = width  # default 200
@@ -34,9 +34,9 @@ class Algorithm_v2:
 
         # load the image and grab its width and height
         image = cv2.imread(path)
-        image = cv2.resize(image, (height-1, width-1), interpolation=cv2.INTER_NEAREST)
-        bColor = [int(image[0][0][0]),int(image[0][0][1]),int(image[0][0][2])]
-        image = cv2.copyMakeBorder(image,1,1,1,1,cv2.BORDER_CONSTANT,value=bColor)
+        image = cv2.resize(image, (height - 1, width - 1), interpolation=cv2.INTER_NEAREST)
+        bColor = [int(image[0][0][0]), int(image[0][0][1]), int(image[0][0][2])]
+        image = cv2.copyMakeBorder(image, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=bColor)
         (h, w) = image.shape[:2]
         # convert the image from the RGB color space to the L*a*b*
         # color space -- since we will be clustering using k-means
@@ -139,101 +139,97 @@ class Algorithm_v2:
             # self.convertToGrayscale()   # creates modifiable image if it doesn't already exist
             print("Edited image does not exist")
 
-    def different_Neighbors(self, idMap, idArr, i, j): # return first neighbor with different color
-        id = idArr[i][j]
-        if i == 0 and j == 0:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i+1][j],idArr[i][j+1],idArr[i+1][j+1]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif i == 0 and j == len(idArr[i])-1:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i][j-1],idArr[i+1][j-1],idArr[i+1][j]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif i == len(idArr)-1 and j == 0:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i-1][j],idArr[i-1][j+1],idArr[i][j+1]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif i == len(idArr)-1 and j == len(idArr[i])-1:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i-1][j-1],idArr[i][j-1],idArr[i-1][j]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif i == 0:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i][j-1],idArr[i+1][j-1],idArr[i+1][j],
-                idArr[i][j+1],idArr[i+1][j+1]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif j == 0:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i-1][j],idArr[i+1][j],
-                idArr[i-1][j+1],idArr[i][j+1],idArr[i+1][j+1]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif i == len(idArr)-1:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i-1][j-1],idArr[i][j-1],
-                idArr[i-1][j],idArr[i-1][j+1],idArr[i][j+1]])
-            if idMap[id][0] != -1:
-                return idMap
-        elif j == len(idArr[i])-1:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i-1][j-1],idArr[i][j-1],idArr[i+1][j-1],
-                idArr[i-1][j],idArr[i+1][j]])
-            if idMap[id][0] != -1:
-                return idMap
-        else:
-            idMap[id][0] = self.unrelated(id,
-                [idArr[i-1][j-1],idArr[i][j-1],idArr[i+1][j-1],
-                idArr[i-1][j],idArr[i+1][j],
-                idArr[i-1][j+1],idArr[i][j+1],idArr[i+1][j+1]])
-            if idMap[id][0] != -1:
-                return idMap
-
-        return idMap
-
-    def collapse_near(self, idMap, idArr): # find pixel groups with minimal existing pixels and convert them
-        minimal = int(len(idArr)/10)
-        if minimal < 10:
-            minimal = 10
+    def collapse_near(self, idMap, idArr, id):  # convert to nearest one that isn't itself
         for i in range(len(idArr)):
             for j in range(len(idArr[i])):
-                if idMap[idArr[i][j]][2] < minimal and idMap[idArr[i][j]][0] == -1:
-                    # convert iff it isn't converting and is minimal pixels
-                    idMap = self.different_Neighbors(idMap, idArr, i, j)
+                if idArr[i][j] == id:  # check neighbors for different colors
+                    if i == 0 and j == 0:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i + 1][j], idArr[i][j + 1], idArr[i + 1][j + 1]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif i == 0 and j == len(idArr[i]) - 1:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i][j - 1], idArr[i + 1][j - 1], idArr[i + 1][j]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif i == len(idArr) - 1 and j == 0:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i - 1][j], idArr[i - 1][j + 1], idArr[i][j + 1]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif i == len(idArr) - 1 and j == len(idArr[i]) - 1:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i - 1][j - 1], idArr[i][j - 1], idArr[i - 1][j]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif i == 0:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i][j - 1], idArr[i + 1][j - 1], idArr[i + 1][j],
+                                                       idArr[i][j + 1], idArr[i + 1][j + 1]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif j == 0:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i - 1][j], idArr[i + 1][j],
+                                                       idArr[i - 1][j + 1], idArr[i][j + 1], idArr[i + 1][j + 1]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif i == len(idArr) - 1:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i - 1][j - 1], idArr[i][j - 1],
+                                                       idArr[i - 1][j], idArr[i - 1][j + 1], idArr[i][j + 1]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    elif j == len(idArr[i]) - 1:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i - 1][j - 1], idArr[i][j - 1], idArr[i + 1][j - 1],
+                                                       idArr[i - 1][j], idArr[i + 1][j]])
+                        if idMap[id][0] != -1:
+                            return idMap
+                    else:
+                        idMap[id][0] = self.unrelated(id,
+                                                      [idArr[i - 1][j - 1], idArr[i][j - 1], idArr[i + 1][j - 1],
+                                                       idArr[i - 1][j], idArr[i + 1][j],
+                                                       idArr[i - 1][j + 1], idArr[i][j + 1], idArr[i + 1][j + 1]])
+                        if idMap[id][0] != -1:
+                            return idMap
+
         return idMap
 
-    def unrelated(self, id, ids): # returns a number in ids that doesn't equal id or return -1
+    def unrelated(self, id, ids):
         for x in ids:
             if id != x:
                 return x
         return -1
 
     def collapse_refit(self, idMap, idArr):
-
+        minimal = int(len(idArr) / 10)
+        if minimal < 10:
+            minimal = 10
         # Collapse
-        idMap = self.collapse_near(idMap, idArr) # scan whole matrix once for min layers and and set convert
         unused_layers = []
-        for id in idMap: # make sure all layers converts to a layer that goes to -1
-            if idMap[id][0] == -1: # if already go to -1 continue and keep layer
-                continue
-            else: # convert it to a layer that goes to a -1, and store it for later cleanup
-                idMap[id][0] = self.travesal(idMap,idMap[id][0])
+        for id in idMap:  # make sure all layers converts to a layer that goes to -1
+            if idMap[id][0] == -1:  # if already go to -1 continue and keep layer
+                if idMap[id][2] < minimal:  # layers with only small amount of pixels get pushed out
+                    idMap = self.collapse_near(idMap, idArr, id)
+                    unused_layers.append(id)
+                    idMap[id][0] = self.travesal(idMap, idMap[id][0])
+                else:
+                    continue
+            else:  # else it is unsused and will be converted later
                 unused_layers.append(id)
+                idMap[id][0] = self.travesal(idMap, idMap[id][0])
 
         # refit [0,1,2,3,4,5,6,7,8,9,10]
         # unused_layers [list of nums] (sorted Lowest to highest) [3,5,7,9]
         num_unused = len(unused_layers)
         unused_index = unused_layers.pop(0)
         end_index = len(idMap) - 1
-        refited_items = {} # making sure to correct items for every item (x) that converts, record which one they convert (n) to and
-            # if we convert (n) we convert all (of x), works because of the structure of the idMap
+        refited_items = {}  # making sure to correct items
         while end_index > unused_index:  # swap bigger index items to a smaller one
             if idMap[end_index][0] == -1:  # swap only if it isn't being swapped already
-                if end_index in refited_items: # make sure all items collapse to the correct idMap
+                if end_index in refited_items:
                     for collapseTarget in refited_items[end_index]:
                         idMap[collapseTarget][0] = unused_index
                     del refited_items[end_index]
@@ -242,7 +238,7 @@ class Algorithm_v2:
                 unused_index = unused_layers.pop(0)
                 end_index -= 1
             else:
-                if idMap[end_index][0] in refited_items: # if item isn't being swap store it's convert target just in case it gets swapped
+                if idMap[end_index][0] in refited_items:
                     refited_items[idMap[end_index][0]].append(end_index)
                 else:
                     refited_items[idMap[end_index][0]] = [end_index]
@@ -252,28 +248,30 @@ class Algorithm_v2:
         for i in range(len(idArr)):
             for j in range(len(idArr[i])):
                 if idMap[idArr[i][j]][0] != -1:
-                    idArr[i][j] = idMap[idArr[i][j]][0] # replace numbers in the idArr
+                    idArr[i][j] = idMap[idArr[i][j]][0]  # replace numbers in the idArr
 
         # Cleanup
-        dict_last_index = list(idMap.keys())[-1] # delete unused layering numbers
+        dict_last_index = list(idMap.keys())[-1]  # delete unused layering numbers
         for x in range((dict_last_index - num_unused + 1), dict_last_index + 1):
             del idMap[x]
         return [idMap, idArr]
 
-    #Testing functions
-    def targetScan(self,idArr,target):
+    # Testing functions
+    def targetScan(self, idArr, target):
         for i in range(len(idArr)):
             for j in range(len(idArr[i])):
                 if idArr[i][j] == target:
-                    return [i,j]
+                    return [i, j]
         return False
-    def idMapScan(self,idMap):
+
+    def idMapScan(self, idMap):
         for i in idMap:
-            print(i,idMap[i][0])
-    def idMapCompare(self,idMap,idMap2):
+            print(i, idMap[i][0])
+
+    def idMapCompare(self, idMap, idMap2):
         for i in idMap:
             if idMap[i][0] != idMap2[i][0]:
-                print(i,":",idMap[i][0],"vs",idMap2[i][0])
+                print(i, ":", idMap[i][0], "vs", idMap2[i][0])
 
     # returns 2D array where each rgb pixel is represented by an id number dictating which color block it belongs to
     def __getID(self, image, x: int, y: int) -> list:
@@ -288,7 +286,8 @@ class Algorithm_v2:
             for j in range(y):
                 pixel = np.array(numArr[i][j]).tolist()
 
-                [layer_num, idMap] = self.getLayerNum(pixel, self.getNeighbors(i, j, idArr), idMap, idArr, self.__BW_enable)
+                [layer_num, idMap] = self.getLayerNum(pixel, self.getNeighbors(i, j, idArr), idMap, idArr,
+                                                      self.__BW_enable)
                 idArr[i].append(layer_num)  # append new column pixel
 
         [idMap, idArr] = self.collapse_refit(idMap, idArr)
@@ -310,21 +309,22 @@ class Algorithm_v2:
         return neighbors
 
     def getLayerNum(self, givenPixel, targets,
-                    idMap, idArr, B_W_enable = False):  # given list of nearby layerNums find similar ones or return new layerNum
+                    idMap, idArr,
+                    B_W_enable=False):  # given list of nearby layerNums find similar ones or return new layerNum
         algo_color_range = 40
         white_black_temp = -1
         algo_black_range = 5
         B_W_bound_range = 85
         if B_W_enable:
-            if(abs(givenPixel[0]-givenPixel[1]) < algo_black_range):# check for greys/blacks/whites zones
-                if(abs(givenPixel[1]-givenPixel[2]) < algo_black_range):
-                    if(abs(givenPixel[0]-givenPixel[2]) < algo_black_range):
-                        if(givenPixel[0] < B_W_bound_range):
-                            white_black_temp = 0 #low extreme
-                        elif(givenPixel[0] < 255 - B_W_bound_range):
-                            white_black_temp = 1 #high extreme
+            if (abs(givenPixel[0] - givenPixel[1]) < algo_black_range):  # check for greys/blacks/whites zones
+                if (abs(givenPixel[1] - givenPixel[2]) < algo_black_range):
+                    if (abs(givenPixel[0] - givenPixel[2]) < algo_black_range):
+                        if (givenPixel[0] < B_W_bound_range):
+                            white_black_temp = 0  # low extreme
+                        elif (givenPixel[0] < 255 - B_W_bound_range):
+                            white_black_temp = 1  # high extreme
                         else:
-                            white_black_temp = 2 #grey
+                            white_black_temp = 2  # grey
         layerNumResult = -1  # return result if it's -1, means new layer
         for i in targets:
             pixel = idMap[i][1]
@@ -353,7 +353,7 @@ class Algorithm_v2:
         idMap[layerNumResult][2] += 1
         return [layerNumResult, idMap]
 
-    def travesal(self, idMap, id): # crawling down to find target with -1 convert value
+    def travesal(self, idMap, id):  # crawling down to find target with -1 convert value
         if idMap[id][0] == -1:
             return id
         else:
@@ -391,7 +391,6 @@ class Algorithm_v2:
         self.export()
 
     def purgeSaved(self) -> None:  # Clear files
-        db = mysql.connector.connect(host="localhost", user="root", password="password", database="colorfind")
         directory = "./exports/" + str(self.__id)
         if os.path.isdir(directory):
             if os.path.isfile(directory + "/title.txt"):
@@ -407,21 +406,10 @@ class Algorithm_v2:
             if os.path.isfile(directory + "/numLayer.txt"):
                 os.remove(directory + "/numLayer.txt")
 
-            cursor = db.cursor()
-            sql_1 = "drop table picture"
-            sql_2 = "Create table picture(id int not null, col varchar(255) not null," \
-                    "roes varchar(255) not null, num_layer varchar(255) not null,color_map text not null," \
-                    "layer_matrix mediumtext not null, name varchar(255) not null, primary key(id))"
-
-            cursor.execute(sql_1)
-            cursor.execute(sql_2)
-            db.close()
-
     def export(self) -> None:  # Export files and create directory
         directory = "./exports/" + str(self.__id)
         try:
             os.makedirs(directory)
-
         except OSError:
             if not os.path.isdir(directory):
                 raise
@@ -431,44 +419,6 @@ class Algorithm_v2:
         self.saveidArrTxt()
         self.saveidColorMapTxt()
         self.saveNumLayerTxt()
-
-        db = mysql.connector.connect(host="localhost", user="root", password="password", database="colorfind")
-        cursor = db.cursor()
-
-        subDir = "./exports/"
-
-        for id in os.listdir(subDir):
-            imageID = int(id) + 1
-            sql = "insert into picture (id, col, roes, num_layer, color_map, layer_matrix, name) VALUES (%s, %s, %s," \
-                  "%s, %s, %s, %s)"
-
-            column_file = open(f"{subDir}{imageID - 1}/column.txt", "r")
-            column = column_file.readlines()
-            row_file = open(f"{subDir}{imageID - 1}/row.txt", "r")
-            row = row_file.readlines()
-            numLayer_file = open(f"{subDir}{imageID - 1}/numLayer.txt", "r")
-            numLayer = numLayer_file.readlines()
-            colorMap_file = open(f"{subDir}{imageID - 1}/colorMap.txt", "r")
-            colorMap = colorMap_file.read()
-            layerMatrix_file = open(f"{subDir}{imageID - 1}/layerMatrix.txt", "r")
-            layerMatrix = layerMatrix_file.read()
-            title_file = open(f"{subDir}{imageID - 1}/title.txt", "r")
-            title = title_file.readlines()
-
-            vals = (imageID, int(column[0]), int(row[0]), int(numLayer[0]), colorMap, layerMatrix, title[0])
-
-            column_file.close()
-            row_file.close()
-            numLayer_file.close()
-            colorMap_file.close()
-            layerMatrix_file.close()
-            title_file.close()
-            cursor.execute(sql, vals)
-            db.commit()
-
-        db.close()
-
-
 
     def saveTitleTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/title.txt"
@@ -480,18 +430,18 @@ class Algorithm_v2:
         txtFile = "./exports/" + str(self.__id) + "/column.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.getDimensions()[1]))
+                appen.write(str(self.__width))
 
     def saveRowTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/row.txt"
         if not os.path.isfile(txtFile):
             with open(txtFile, "w") as appen:
-                appen.write(str(self.getDimensions()[0]))
+                appen.write(str(self.__height))
 
     def saveidArrTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/layerMatrix.txt"
         if not os.path.isfile(txtFile):
-            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",", newline=',')
+            np.savetxt(txtFile, np.array(self.idArr), fmt="%d", delimiter=",")
 
     def saveidColorMapTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/colorMap.txt"
@@ -499,7 +449,7 @@ class Algorithm_v2:
             for _, values in self.idColorMap.items():
                 a = np.array(values[1])
                 with open(txtFile, "ab") as appen:
-                    np.savetxt(appen, a.reshape(1,a.shape[0]), fmt="%d", delimiter=",")
+                    np.savetxt(appen, a.reshape(1, a.shape[0]), fmt="%d", delimiter=",")
 
     def saveNumLayerTxt(self) -> None:
         txtFile = "./exports/" + str(self.__id) + "/numLayer.txt"
@@ -520,7 +470,3 @@ class Algorithm_v2:
     # returns color has map with color ID and their corresponding pixel(rgb) list
     def getColorMap(self) -> dict:
         return self.idColorMap
-
-
-test = Algorithm_v2("ball.jpg", 4)
-test.updateExport()
