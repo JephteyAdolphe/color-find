@@ -240,6 +240,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
   }
 }
 
+
 class MyPainter extends CustomPainter {
   List<globals.ColorRecord> points;
 
@@ -251,7 +252,12 @@ class MyPainter extends CustomPainter {
     canvas.drawRect(rect, background);
 
     //testing fillLayer function
-    globals.fillLayer(globals.canvas, selectedLayer, selectedColor);
+    for (int i = 0; i < globals.layerFill.length; i++)
+    {
+      if(globals.layerFill[i])
+        globals.fillLayer(canvas, i, selectedColor);
+    }
+
 
     for (int x = 0; x < points.length - 1; x++) {
       if (points[x] != null && points[x + 1] != null) {
