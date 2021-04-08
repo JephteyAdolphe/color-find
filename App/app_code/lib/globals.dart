@@ -21,6 +21,7 @@ bool recorderInserted = false; // check
 
 //List (ensures sections are colored in w/ same color)
 var selectedColors;
+var layerFill;
 
 // screen sizing
 var screenW;// Total screen width
@@ -124,6 +125,7 @@ void fetchFileData(String id) async {
   readTitle = await rootBundle.loadString('assets/' + id + '/title.txt');
 
   selectedColors = List<Color>.filled(int.parse(readNumLayer), null);
+  layerFill = List<bool>.filled(int.parse(readNumLayer), false);
 
   //load text files into Image class
   loadedImage.layerMatrix = readLayerMatrix;
