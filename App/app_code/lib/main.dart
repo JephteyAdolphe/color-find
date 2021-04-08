@@ -260,6 +260,7 @@ class MyPainter extends CustomPainter {
       } else if (points[x] != null && points[x + 1] == null) {
         Paint paint = points[x].colorRecord;
         canvas.drawPoints(PointMode.points, [points[x].point], paint);
+        //hi
       }
     }
   }

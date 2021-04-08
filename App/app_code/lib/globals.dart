@@ -239,6 +239,7 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
           ..color = colorInput
           ..strokeWidth = strokeSize
           ..strokeCap = StrokeCap.round);
+        //hi
       }
     }
   }
