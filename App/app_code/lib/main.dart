@@ -136,7 +136,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                 selectedColor = globals.activeColor;
                 globals.selectedColors[selectedLayer] = selectedColor;
               }
-
+              globals.layerFill[selectedLayer] = true;
               //Debug
               print("Selected Layer:");
               print(selectedLayer);
@@ -150,7 +150,9 @@ class _DrawingBlockState extends State<DrawingBlock> {
                   // [1 , 2 ; 1 , 0]
                   point: details.localPosition,
                   colorRecord: Paint()
-                    ..color = dummyMode ? globals.activeColor : globals.selectedColors[selectedLayer]
+                    ..color = dummyMode
+                        ? globals.activeColor
+                        : globals.selectedColors[selectedLayer]
                     ..strokeWidth = globals.strokeSize
                     ..strokeCap = StrokeCap.round));
             } else {
@@ -182,7 +184,9 @@ class _DrawingBlockState extends State<DrawingBlock> {
                     //add record
                     point: details.localPosition,
                     colorRecord: Paint()
-                      ..color = dummyMode ? globals.activeColor : globals.selectedColors[selectedLayer]
+                      ..color = dummyMode
+                          ? globals.activeColor
+                          : globals.selectedColors[selectedLayer]
                       ..strokeWidth = globals.strokeSize
                       ..strokeCap = StrokeCap.round));
               } else {
@@ -240,7 +244,6 @@ class _DrawingBlockState extends State<DrawingBlock> {
   }
 }
 
-
 class MyPainter extends CustomPainter {
   List<globals.ColorRecord> points;
 
@@ -252,12 +255,15 @@ class MyPainter extends CustomPainter {
     canvas.drawRect(rect, background);
 
     //testing fillLayer function
-    for (int i = 0; i < globals.layerFill.length; i++)
-    {
-      if(globals.layerFill[i])
-        globals.fillLayer(canvas, i, selectedColor);
+    for (int i = 0; i < globals.layerFill.length; i++) {
+      if (globals.layerFill[i])
+        globals.fillLayer(
+            canvas,
+            i,
+            globals.selectedColors[i] != null
+                ? globals.selectedColors[i]
+                : Colors.black);
     }
-
 
     for (int x = 0; x < points.length - 1; x++) {
       if (points[x] != null && points[x + 1] != null) {
