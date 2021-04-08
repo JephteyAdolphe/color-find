@@ -256,13 +256,14 @@ class MyPainter extends CustomPainter {
 
     //testing fillLayer function
     for (int i = 0; i < globals.layerFill.length; i++) {
-      if (globals.layerFill[i])
+      if (globals.layerFill[i]) {
         globals.fillLayer(
             canvas,
             i,
             globals.selectedColors[i] != null
                 ? globals.selectedColors[i]
                 : Colors.black);
+      }
     }
 
     for (int x = 0; x < points.length - 1; x++) {
@@ -272,7 +273,6 @@ class MyPainter extends CustomPainter {
       } else if (points[x] != null && points[x + 1] == null) {
         Paint paint = points[x].colorRecord;
         canvas.drawPoints(PointMode.points, [points[x].point], paint);
-        //hi
       }
     }
   }

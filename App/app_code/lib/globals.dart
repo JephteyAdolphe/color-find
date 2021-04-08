@@ -226,22 +226,16 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
   var point;
   int matrixWidth = int.parse(loadedImage.column);
   int matrixHeight = int.parse(loadedImage.row);
-  /*paint:
-  Paint()
-    ..color = colorInput
-    ..strokeWidth = strokeSize
-    ..strokeCap = StrokeCap.round;*/
   for (var x = 0; x < matrixWidth; x++) {
-    double dx = x * (drawWidth / matrixWidth);
+    double dx = x * (matrixWidth / drawWidth);
     for (var y = 0; y < matrixHeight; y++) {
-      double dy = y * (drawHeight / matrixHeight);
+      double dy = y * (matrixHeight / drawHeight);
       if (layer == loadedImage.matrix[x][y].value) {
-        point = Offset(dx, dy);
+        point = Offset(dy, dx);
         canvas.drawPoints(PointMode.points, [point], Paint()
           ..color = colorInput
           ..strokeWidth = strokeSize
           ..strokeCap = StrokeCap.round);
-        //hi
       }
     }
   }
