@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
@@ -101,7 +100,21 @@ class DrawingBlock extends StatefulWidget {
  Copied from canvas.dart
 */
 
-class _DrawingBlockState extends State<DrawingBlock> {
+class _DrawingBlockState extends State<DrawingBlock>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    )..repeat();
+    super.initState();
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     // get screen sizes to rescale image to canvas
@@ -211,10 +224,15 @@ class _DrawingBlockState extends State<DrawingBlock> {
         child: Stack(
           children: <Widget>[
             //borderRadius: BorderRadius.all(Radius.circular(20)),
-            CustomPaint(
-              painter: MyPainter(
-                points: globals.records,
-              ),
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (_, __) {
+                return CustomPaint(
+                  painter: MyPainter(
+                    points: globals.records,
+                  ),
+                );
+              },
             ),
             Row(
               children: [
