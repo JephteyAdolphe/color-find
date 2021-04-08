@@ -136,6 +136,7 @@ class _DrawingBlockState extends State<DrawingBlock> {
                 selectedColor = globals.activeColor;
                 globals.selectedColors[selectedLayer] = selectedColor;
               }
+
               //Debug
               print("Selected Layer:");
               print(selectedLayer);
@@ -248,6 +249,9 @@ class MyPainter extends CustomPainter {
     Paint background = Paint()..color = Colors.white;
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRect(rect, background);
+
+    //testing fillLayer function
+    globals.fillLayer(globals.canvas, selectedLayer, selectedColor);
 
     for (int x = 0; x < points.length - 1; x++) {
       if (points[x] != null && points[x + 1] != null) {

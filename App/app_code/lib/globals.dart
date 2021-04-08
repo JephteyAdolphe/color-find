@@ -7,8 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:permission_handler/permission_handler.dart';
-
-//import directives: Pavan
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -220,4 +218,28 @@ Future<void> writeToFile(ByteData data, String path) {
   final buffer = data.buffer;
   return new File(path)
       .writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+}
+
+void fillLayer(Canvas canvas, int layer, Color colorInput) {
+  var point;
+  int matrixWidth = int.parse(loadedImage.column);
+  int matrixHeight = int.parse(loadedImage.row);
+  /*paint:
+  Paint()
+    ..color = colorInput
+    ..strokeWidth = strokeSize
+    ..strokeCap = StrokeCap.round;*/
+  for (var x = 0; x < matrixWidth; x++) {
+    double dx = x * (drawWidth / matrixWidth);
+    for (var y = 0; y < matrixHeight; y++) {
+      double dy = y * (drawHeight / matrixHeight);
+      if (layer == loadedImage.matrix[x][y].value) {
+        point = Offset(dx, dy);
+        canvas.drawPoints(PointMode.points, [point], Paint()
+          ..color = colorInput
+          ..strokeWidth = strokeSize
+          ..strokeCap = StrokeCap.round);
+      }
+    }
+  }
 }
