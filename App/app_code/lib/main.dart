@@ -113,8 +113,6 @@ class _DrawingBlockState extends State<DrawingBlock>
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     // get screen sizes to rescale image to canvas
@@ -124,9 +122,20 @@ class _DrawingBlockState extends State<DrawingBlock>
     globals.setCanvasSize();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Layering Dummy Test'),
+        backgroundColor: Color(0xFFB388FF), //0xFFA5D6A7
+        centerTitle: true,
+        title: const Text(
+          'Layering Dummy Test',
+          style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.w800,
+          fontFamily: 'BalooBhai',
+          ),
+        ),
       ),
-      drawer: getMenu(context),
+      drawer: Menu(),
+      //getMenu(context)/build(context)
       body: GestureDetector(
         onPanDown: (details) {
           this.setState(() {
@@ -272,15 +281,18 @@ class MyPainter extends CustomPainter {
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRect(rect, background);
 
-    //testing fillLayer function
-    for (int i = 0; i < globals.layerFill.length; i++) {
-      if (globals.layerFill[i]) {
-        globals.fillLayer(
-            canvas,
-            i,
-            globals.selectedColors[i] != null
-                ? globals.selectedColors[i]
-                : Colors.black);
+    //fillLayer function
+
+    if (globals.fillPermission == 1) {
+      for (int i = 0; i < globals.layerFill.length; i++) {
+        if (globals.layerFill[i]) {
+          globals.fillLayer(
+              canvas,
+              i,
+              globals.selectedColors[i] != null
+                  ? globals.selectedColors[i]
+                  : Colors.black);
+        }
       }
     }
 

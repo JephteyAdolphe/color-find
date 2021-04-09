@@ -22,7 +22,7 @@ bool recorderInserted = false; // check
 //List (ensures sections are colored in w/ same color)
 var selectedColors;
 var layerFill;
-
+int fillPermission = 0;
 // screen sizing
 var screenW;// Total screen width
 var screenH;// Total screen height
