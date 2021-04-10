@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
@@ -14,7 +15,7 @@ bool lastNull = false; // check if one null has been inserted -> reducing load
 Color selectedColor; //color selected for current section
 bool dummyMode = false; // using dummyLayering
 
-int getLayer(targetWidth, targetHeight, fillLayer) {
+int getLayer(targetWidth, targetHeight, fillLayer, oldPositionDX, oldPositionDY) {
   // rescales given position and Layering Matrix to the canvas size
   int matrixHeight = int.parse(globals.loadedImage.row);
   int matrixWidth = int.parse(globals.loadedImage.column);
@@ -39,7 +40,17 @@ int getLayer(targetWidth, targetHeight, fillLayer) {
       globals.layerAmountFilled[globals
           .loadedImage
           .matrix[selectedDY.toInt()][selectedDX.toInt()]
-          .value] += 10 * globals.strokeSize.toInt(); //
+          .value] += 20 * globals.strokeSize.toInt(); //
+      if (oldPositionDX != null)
+      {
+        var oldDY = oldPositionDY * (matrixHeight / globals.drawHeight);
+        var oldDX = oldPositionDX * (matrixWidth / globals.drawWidth);
+        var dist = sqrt((oldDY-selectedDY)^2 + (oldDX-selectedDX)^2).toInt();
+        globals.layerAmountFilled[globals
+            .loadedImage
+            .matrix[selectedDY.toInt()][selectedDX.toInt()]
+            .value] += dist;
+      }
     }
   }
   return globals
@@ -159,7 +170,7 @@ class _DrawingBlockState extends State<DrawingBlock>
             if (globals.imageLoaded) {
               //Get layer at current position
               selectedLayer = getLayer(
-                  details.localPosition.dx, details.localPosition.dy, -2);
+                  details.localPosition.dx, details.localPosition.dy, -2, null,null);
               dummyMode = false;
             } else {
               selectedLayer = dummyLayers(
@@ -206,7 +217,7 @@ class _DrawingBlockState extends State<DrawingBlock>
               if (globals.imageLoaded) {
                 //Get layer at current position
                 tempLayer = getLayer(details.localPosition.dx,
-                    details.localPosition.dy, selectedLayer);
+                    details.localPosition.dy, selectedLayer,oldDX,oldDY);
               } else
                 tempLayer = dummyLayers(
                     details.localPosition.dy, details.localPosition.dx);
@@ -299,7 +310,7 @@ class MyPainter extends CustomPainter {
     //testing fillLayer function
     if (globals.fillPermission == 1) {
       for (int i = 0; i < globals.layerFill.length; i++) {
-        if (globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] > 0.5) {
+        if (globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] > 0.4) {
           globals.layerFill[i] = true;
         }
         if (globals.layerFill[i]) {
