@@ -29,14 +29,17 @@ int getLayer(targetWidth, targetHeight, fillLayer) {
   }
   // counts if specfic spot hasn't been visited before
   if (fillLayer ==
-      globals.loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()]
-          .value ||
+          globals.loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()]
+              .value ||
       fillLayer == -2) {
     if (!globals.layerBool[selectedDY.toInt()][selectedDX.toInt()]) {
       globals.layerBool[selectedDY.toInt()][selectedDX.toInt()] = true;
-      globals.layerAmountFilled[globals.loadedImage
-          .matrix[selectedDY.toInt()][selectedDX.toInt()].value] +=
-          100*globals.strokeSize.toInt(); //
+      var dxScale = matrixWidth / globals.drawWidth;
+      var dyScale = matrixHeight / globals.drawHeight;
+      globals.layerAmountFilled[globals
+          .loadedImage
+          .matrix[selectedDY.toInt()][selectedDX.toInt()]
+          .value] += 10 * globals.strokeSize.toInt(); //
     }
   }
   return globals
@@ -125,8 +128,6 @@ class _DrawingBlockState extends State<DrawingBlock>
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     // get screen sizes to rescale image to canvas
@@ -141,10 +142,10 @@ class _DrawingBlockState extends State<DrawingBlock>
         title: const Text(
           'Layering Dummy Test',
           style: TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.w800,
-          fontFamily: 'BalooBhai',
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            fontFamily: 'BalooBhai',
           ),
         ),
       ),
@@ -217,10 +218,12 @@ class _DrawingBlockState extends State<DrawingBlock>
                 oldDY = details.localPosition.dy.toInt();
                 lastNull = false; // this is non null point so reset last null
                 globals.records.add(globals.ColorRecord(
-                  //add record
+                    //add record
                     point: details.localPosition,
                     colorRecord: Paint()
-                      ..color = dummyMode ? globals.activeColor : globals.selectedColors[selectedLayer]
+                      ..color = dummyMode
+                          ? globals.activeColor
+                          : globals.selectedColors[selectedLayer]
                       ..strokeWidth = globals.strokeSize
                       ..strokeCap = StrokeCap.round));
               } else {
@@ -294,18 +297,19 @@ class MyPainter extends CustomPainter {
     canvas.drawRect(rect, background);
 
     //testing fillLayer function
-    for (int i = 0; i < globals.layerFill.length; i++) {
-      if (globals.layerAmountFilled[i]/globals.layerAmountMax[i] > 0.5)
-      {
-        globals.layerFill[i] = true;
-      }
-      if (globals.layerFill[i]) {
-        globals.fillLayer(
-            canvas,
-            i,
-            globals.selectedColors[i] != null
-                ? globals.selectedColors[i]
-                : Colors.black);
+    if (globals.fillPermission == 1) {
+      for (int i = 0; i < globals.layerFill.length; i++) {
+        if (globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] > 0.5) {
+          globals.layerFill[i] = true;
+        }
+        if (globals.layerFill[i]) {
+          globals.fillLayer(
+              canvas,
+              i,
+              globals.selectedColors[i] != null
+                  ? globals.selectedColors[i]
+                  : Colors.black);
+        }
       }
     }
 

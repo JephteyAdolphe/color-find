@@ -15,7 +15,7 @@ import 'package:flutter/services.dart' show rootBundle;
 //
 List<ColorRecord> records = []; //record of all colors
 Color activeColor = Colors.black; //globally selected/current color
-double strokeSize = 4; //size of the stroke
+double strokeSize = 8; //size of the stroke
 
 PictureRecorder recorder = new PictureRecorder(); //records canvas draws
 Canvas canvas = new Canvas(recorder); // canvas
@@ -27,6 +27,7 @@ var layerFill;
 int fillPermission = 0;
 var layerBool; //check for amount of pixels filled in
 var layerAmountMax; //check for amount of pixels per layer
+var layerAmountMaxScaled; //scaled to screen size
 var layerAmountFilled; //check for amount of pixels filled per layer
 
 // screen sizing
@@ -49,6 +50,7 @@ void printCanvasSize() {
   print(drawHeight);
   print(drawWidth);
   print(layerAmountMax);
+  print(layerAmountMaxScaled);
   print(layerAmountFilled);
 }
 
@@ -134,9 +136,11 @@ void fetchFileData(String id) async {
 
   selectedColors = List<Color>.filled(int.parse(readNumLayer), null);
   layerFill = List<bool>.filled(int.parse(readNumLayer), false);
+  fillPermission = 1;
   //Matrix Sized truth table:
   layerBool = List<List<bool>>.filled(int.parse(readColumn), List<bool>.filled(int.parse(readRow), false));
   layerAmountMax = List<int>.filled(int.parse(readNumLayer), 0); // count for layer amount
+  layerAmountMaxScaled = List<int>.filled(int.parse(readNumLayer), 0); //scaled
   layerAmountFilled = List<int>.filled(int.parse(readNumLayer), 0);
 
   //load text files into Image class
@@ -162,6 +166,13 @@ void fetchFileData(String id) async {
   }
   x.cntr = 0;
   //END
+  int matrixNumber = int.parse(loadedImage.row)*int.parse(loadedImage.column);
+  int canvasNumber = drawWidth*drawHeight;
+  for(int i = 0; i < layerAmountMax.length; i++)
+  {//Scales LayerAmountMax to screen size
+    double temp = canvasNumber.toDouble()*layerAmountMax[i]/matrixNumber;
+    layerAmountMaxScaled[i] = temp.toInt();
+  }
   imageLoaded = true;
 }
 
@@ -252,4 +263,4 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
       }
     }
   }
-}}
+}
