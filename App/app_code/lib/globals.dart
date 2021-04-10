@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:permission_handler/permission_handler.dart';
+
+//import directives: Pavan
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -23,6 +25,10 @@ bool recorderInserted = false; // check
 var selectedColors;
 var layerFill;
 int fillPermission = 0;
+var layerBool; //check for amount of pixels filled in
+var layerAmountMax; //check for amount of pixels per layer
+var layerAmountFilled; //check for amount of pixels filled per layer
+
 // screen sizing
 var screenW;// Total screen width
 var screenH;// Total screen height
@@ -42,6 +48,8 @@ void printCanvasSize() {
   print(appBarH);
   print(drawHeight);
   print(drawWidth);
+  print(layerAmountMax);
+  print(layerAmountFilled);
 }
 
 List<double> getCanvasSize() {
@@ -126,6 +134,10 @@ void fetchFileData(String id) async {
 
   selectedColors = List<Color>.filled(int.parse(readNumLayer), null);
   layerFill = List<bool>.filled(int.parse(readNumLayer), false);
+  //Matrix Sized truth table:
+  layerBool = List<List<bool>>.filled(int.parse(readColumn), List<bool>.filled(int.parse(readRow), false));
+  layerAmountMax = List<int>.filled(int.parse(readNumLayer), 0); // count for layer amount
+  layerAmountFilled = List<int>.filled(int.parse(readNumLayer), 0);
 
   //load text files into Image class
   loadedImage.layerMatrix = readLayerMatrix;
@@ -144,6 +156,7 @@ void fetchFileData(String id) async {
   for (var i = 0; i < int.parse(loadedImage.row); i++) {
     for (var j = 0; j < int.parse(loadedImage.column); j++) {
       loadedImage.matrix[i][j].value = int.parse(array[(x.cntr)]);
+      layerAmountMax[loadedImage.matrix[i][j].value] += 1;
       x.cntr++;
     }
   }
@@ -226,10 +239,10 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
   var point;
   int matrixWidth = int.parse(loadedImage.column);
   int matrixHeight = int.parse(loadedImage.row);
-  for (var x = 0; x < matrixWidth; x++) {
-    double dx = x * (matrixWidth / drawWidth);
-    for (var y = 0; y < matrixHeight; y++) {
-      double dy = y * (matrixHeight / drawHeight);
+  for (var x = 0; x < matrixHeight; x++) {
+    double dx = x * (drawHeight/matrixHeight);
+    for (var y = 0; y < matrixWidth; y++) {
+      double dy = y * (drawWidth/matrixWidth);
       if (layer == loadedImage.matrix[x][y].value) {
         point = Offset(dy, dx);
         canvas.drawPoints(PointMode.points, [point], Paint()
@@ -239,4 +252,4 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
       }
     }
   }
-}
+}}

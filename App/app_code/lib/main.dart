@@ -14,7 +14,7 @@ bool lastNull = false; // check if one null has been inserted -> reducing load
 Color selectedColor; //color selected for current section
 bool dummyMode = false; // using dummyLayering
 
-int getLayer(targetWidth, targetHeight) {
+int getLayer(targetWidth, targetHeight, fillLayer) {
   // rescales given position and Layering Matrix to the canvas size
   int matrixHeight = int.parse(globals.loadedImage.row);
   int matrixWidth = int.parse(globals.loadedImage.column);
@@ -26,6 +26,18 @@ int getLayer(targetWidth, targetHeight) {
       selectedDY < 0) {
     // if it is bigger or negative then matrix size return -1 for null
     return -1;
+  }
+  // counts if specfic spot hasn't been visited before
+  if (fillLayer ==
+      globals.loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()]
+          .value ||
+      fillLayer == -2) {
+    if (!globals.layerBool[selectedDY.toInt()][selectedDX.toInt()]) {
+      globals.layerBool[selectedDY.toInt()][selectedDX.toInt()] = true;
+      globals.layerAmountFilled[globals.loadedImage
+          .matrix[selectedDY.toInt()][selectedDX.toInt()].value] +=
+          100*globals.strokeSize.toInt(); //
+    }
   }
   return globals
       .loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()].value;
@@ -113,6 +125,8 @@ class _DrawingBlockState extends State<DrawingBlock>
     super.initState();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     // get screen sizes to rescale image to canvas
@@ -143,8 +157,8 @@ class _DrawingBlockState extends State<DrawingBlock>
             oldDY = details.localPosition.dy.toInt();
             if (globals.imageLoaded) {
               //Get layer at current position
-              selectedLayer =
-                  getLayer(details.localPosition.dx, details.localPosition.dy);
+              selectedLayer = getLayer(
+                  details.localPosition.dx, details.localPosition.dy, -2);
               dummyMode = false;
             } else {
               selectedLayer = dummyLayers(
@@ -158,7 +172,7 @@ class _DrawingBlockState extends State<DrawingBlock>
                 selectedColor = globals.activeColor;
                 globals.selectedColors[selectedLayer] = selectedColor;
               }
-              globals.layerFill[selectedLayer] = true;
+              //globals.layerFill[selectedLayer] = true;
               //Debug
               print("Selected Layer:");
               print(selectedLayer);
@@ -190,8 +204,8 @@ class _DrawingBlockState extends State<DrawingBlock>
               //check if it is the same spot as before if so don't put a point.
               if (globals.imageLoaded) {
                 //Get layer at current position
-                tempLayer = getLayer(
-                    details.localPosition.dx, details.localPosition.dy);
+                tempLayer = getLayer(details.localPosition.dx,
+                    details.localPosition.dy, selectedLayer);
               } else
                 tempLayer = dummyLayers(
                     details.localPosition.dy, details.localPosition.dx);
@@ -203,12 +217,10 @@ class _DrawingBlockState extends State<DrawingBlock>
                 oldDY = details.localPosition.dy.toInt();
                 lastNull = false; // this is non null point so reset last null
                 globals.records.add(globals.ColorRecord(
-                    //add record
+                  //add record
                     point: details.localPosition,
                     colorRecord: Paint()
-                      ..color = dummyMode
-                          ? globals.activeColor
-                          : globals.selectedColors[selectedLayer]
+                      ..color = dummyMode ? globals.activeColor : globals.selectedColors[selectedLayer]
                       ..strokeWidth = globals.strokeSize
                       ..strokeCap = StrokeCap.round));
               } else {
@@ -281,18 +293,19 @@ class MyPainter extends CustomPainter {
     Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.drawRect(rect, background);
 
-    //fillLayer function
-
-    if (globals.fillPermission == 1) {
-      for (int i = 0; i < globals.layerFill.length; i++) {
-        if (globals.layerFill[i]) {
-          globals.fillLayer(
-              canvas,
-              i,
-              globals.selectedColors[i] != null
-                  ? globals.selectedColors[i]
-                  : Colors.black);
-        }
+    //testing fillLayer function
+    for (int i = 0; i < globals.layerFill.length; i++) {
+      if (globals.layerAmountFilled[i]/globals.layerAmountMax[i] > 0.5)
+      {
+        globals.layerFill[i] = true;
+      }
+      if (globals.layerFill[i]) {
+        globals.fillLayer(
+            canvas,
+            i,
+            globals.selectedColors[i] != null
+                ? globals.selectedColors[i]
+                : Colors.black);
       }
     }
 
