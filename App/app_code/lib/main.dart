@@ -354,7 +354,7 @@ class MyPainter extends CustomPainter {
     //testing fillLayer function
     if (globals.fillPermission == 1) {
       for (int i = 0; i < globals.layerFill.length; i++) {
-        if (globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] >
+        if (!globals.layerFill[i] && globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] >
             1.75) {
           //condition check to fill layer
           globals.layerFill[i] = true;
