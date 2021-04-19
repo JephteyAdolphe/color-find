@@ -633,7 +633,7 @@ ball.updateExport()
 plt.imshow(ball.idToRGB())
 plt.show()
 '''
-# normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = False)
+normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = True)
 '''
 trialx = 25
 results1 = results_of_algorithm(Algorithm_v1_old,   trials= trialx)
@@ -647,5 +647,5 @@ for target in results1:
 print("Average Time per Algorithm for each image:")
 print(summaryTable)
 '''
-test = Algorithm_v2("ball.jpg", 4)
-test.updateExport()
+# test = Algorithm_v2("ball.jpg", 4)
+# test.updateExport()

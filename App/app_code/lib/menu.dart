@@ -125,7 +125,7 @@ class _MenuState extends State<Menu> {
             child: InkResponse(
               radius: 400,
               onTap: () {
-                globals.fetchFileData("0");
+                globals.fetchFileData("1");
                 globals.clear();
                 //print(globals.loadedImage.title);
                 Navigator.pop(context);
@@ -153,6 +153,7 @@ class _MenuState extends State<Menu> {
               radius: 400,
               onTap: () {
                 // Go to page
+                globals.fetchFileData(globals.imageID);
                 globals.clear();
                 Navigator.pop(context);
               },
