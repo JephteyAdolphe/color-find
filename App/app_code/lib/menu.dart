@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'globals.dart' as globals;
-
 import 'form_screen.dart';
+import 'dart:math';
 
 class Menu extends StatefulWidget {
   @override
@@ -125,7 +125,7 @@ class _MenuState extends State<Menu> {
             child: InkResponse(
               radius: 400,
               onTap: () {
-                globals.fetchFileData("0");
+                globals.fetchFileData("1");
                 globals.clear();
                 //print(globals.loadedImage.title);
                 Navigator.pop(context);
@@ -391,7 +391,14 @@ class _MenuState extends State<Menu> {
           shape: const StadiumBorder(),
           color: Colors.deepPurpleAccent[100],
           padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 14),
-          onPressed: () {},
+          onPressed: () {
+            var rng = new Random();
+            String x = rng.nextInt(8).toString();
+            globals.fetchFileData(x);
+            globals.clear();
+            //print(globals.loadedImage.title);
+            Navigator.pop(context);
+          },
           child: const Text(
             'New Picture!',
             style: TextStyle(
