@@ -54,6 +54,12 @@ flutter:
   assets:
     - assets/1/
     - assets/0/
+    - assets/2/
+    - assets/3/
+    - assets/4/
+    - assets/5/
+    - assets/6/
+    - assets/7/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
