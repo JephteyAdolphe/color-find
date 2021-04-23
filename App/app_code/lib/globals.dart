@@ -13,6 +13,7 @@ import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
 
 //
+String imageID = "-1";
 List<ColorRecord> records = []; //record of all colors
 Color activeColor = Colors.black; //globally selected/current color
 double strokeSize = 8; //size of the stroke
@@ -25,21 +26,23 @@ bool recorderInserted = false; // check
 var selectedColors;
 var layerFill;
 int fillPermission = 0;
-var layerBool; //check for amount of pixels filled in
+var layerFillOld; //check layer that is going to be filled
+var layerBool; //Truth matrix of the picture
 var layerAmountMax; //check for amount of pixels per layer
 var layerAmountMaxScaled; //scaled to screen size
 var layerAmountFilled; //check for amount of pixels filled per layer
 
 // screen sizing
-var screenW;// Total screen width
-var screenH;// Total screen height
-var appBarH;// appBar height
-int drawWidth;// Canvas Width limiter
-int drawHeight;// Canvas Height limiter
+var screenW; // Total screen width
+var screenH; // Total screen height
+var appBarH; // appBar height
+var padding; // padding.
+int drawWidth; // Canvas Width limiter
+int drawHeight; // Canvas Height limiter
 
 void setCanvasSize() {
-  drawHeight =
-      (screenH - appBarH - 65 - 20).floor(); // 65 = palette,, 20 = extra buffer
+  drawHeight = (screenH - appBarH - 65 - padding.top - padding.bottom)
+      .floor(); // 65 = palette,, 20 = extra buffer
   drawWidth = (screenW).floor();
 }
 
@@ -52,6 +55,11 @@ void printCanvasSize() {
   print(layerAmountMax);
   print(layerAmountMaxScaled);
   print(layerAmountFilled);
+  print(fillPermission);
+  print(loadedImage.column);
+  print(loadedImage.row);
+  print(layerFill);
+  print(layerFillOld);
 }
 
 List<double> getCanvasSize() {
@@ -61,8 +69,9 @@ List<double> getCanvasSize() {
 class ColorRecord {
   Offset point; //location
   Paint colorRecord; //color
+  int layer; // which layer this is
 
-  ColorRecord({this.point, this.colorRecord});
+  ColorRecord({this.point, this.colorRecord, this.layer});
 }
 
 void clear() {
@@ -113,6 +122,7 @@ Image loadedImage = new Image();
 bool imageLoaded = false;
 
 void fetchFileData(String id) async {
+  imageID = id;
   //START
   String readLayerMatrix;
   String readNumLayer;
@@ -137,9 +147,12 @@ void fetchFileData(String id) async {
   selectedColors = List<Color>.filled(int.parse(readNumLayer), null);
   layerFill = List<bool>.filled(int.parse(readNumLayer), false);
   fillPermission = 1;
+  layerFillOld = List<bool>.filled(int.parse(readNumLayer), false);
   //Matrix Sized truth table:
-  layerBool = List<List<bool>>.filled(int.parse(readColumn), List<bool>.filled(int.parse(readRow), false));
-  layerAmountMax = List<int>.filled(int.parse(readNumLayer), 0); // count for layer amount
+  layerBool = List<List<bool>>.filled(
+      int.parse(readColumn), List<bool>.filled(int.parse(readRow), false));
+  layerAmountMax =
+      List<int>.filled(int.parse(readNumLayer), 0); // count for layer amount
   layerAmountMaxScaled = List<int>.filled(int.parse(readNumLayer), 0); //scaled
   layerAmountFilled = List<int>.filled(int.parse(readNumLayer), 0);
 
@@ -166,11 +179,11 @@ void fetchFileData(String id) async {
   }
   x.cntr = 0;
   //END
-  int matrixNumber = int.parse(loadedImage.row)*int.parse(loadedImage.column);
-  int canvasNumber = drawWidth*drawHeight;
-  for(int i = 0; i < layerAmountMax.length; i++)
-  {//Scales LayerAmountMax to screen size
-    double temp = canvasNumber.toDouble()*layerAmountMax[i]/matrixNumber;
+  int matrixNumber = int.parse(loadedImage.row) * int.parse(loadedImage.column);
+  int canvasNumber = drawWidth * drawHeight;
+  for (int i = 0; i < layerAmountMax.length; i++) {
+    //Scales LayerAmountMax to screen size
+    double temp = canvasNumber.toDouble() * layerAmountMax[i] / matrixNumber;
     layerAmountMaxScaled[i] = temp.toInt();
   }
   imageLoaded = true;
@@ -186,8 +199,35 @@ Future<String> getStorageDirectory() async {
   }
 }
 
-void saveImage({clearRecords = false}) async {
 
+void fillLayer(Canvas canvas, int layer, Color colorInput) {
+  var point;
+  int matrixWidth = int.parse(loadedImage.column);
+  int matrixHeight = int.parse(loadedImage.row);
+  for (var x = 0; x < matrixHeight; x++) {
+    if (x%2 == 0)
+      continue;
+    double dx = x * (drawHeight / matrixHeight);
+    for (var y = 0; y < matrixWidth; y++) {
+      if (y%2 == 0)
+        continue;
+      double dy = y * (drawWidth / matrixWidth);
+      if (layer == loadedImage.matrix[x][y].value) {
+        point = Offset(dy, dx);
+        canvas.drawPoints(
+          PointMode.points,
+          [point],
+          Paint()
+            ..color = colorInput
+            ..strokeWidth = 4
+            ..strokeCap = StrokeCap.round,
+        );
+      }
+    }
+  }
+}
+
+void saveImage({clearRecords = false}) async {
   var imgPermission = await Permission.storage.status;
   if (imgPermission.isUndetermined) {
     print("");
@@ -212,6 +252,20 @@ void saveImage({clearRecords = false}) async {
   List<ColorRecord> points = records;
   canvas.drawRect(rect, background);
 
+  if (fillPermission == 1) {
+    for (int i = 0; i < layerFill.length; i++) {
+      if (layerFill[i]) {
+        // Fill Layer
+        fillLayer(
+            canvas,
+            i,
+            selectedColors[i] != null
+                ? selectedColors[i]
+                : Colors.black);
+      }
+    }
+  }
+
   for (int x = 0; x < points.length - 1; x++) {
     if (points[x] != null && points[x + 1] != null) {
       Paint paint = points[x].colorRecord;
@@ -229,7 +283,8 @@ void saveImage({clearRecords = false}) async {
 
   print('Image saving');
   //save image
-  writeToFile(pngBytes, myImagePath + '/imgtest.png'); //needs to be dynamic saving.
+  writeToFile(
+      pngBytes, myImagePath + '/imgtest.png'); //needs to be dynamic saving.
 
   print('image Saved');
 
@@ -244,23 +299,4 @@ Future<void> writeToFile(ByteData data, String path) {
   final buffer = data.buffer;
   return new File(path)
       .writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
-}
-
-void fillLayer(Canvas canvas, int layer, Color colorInput) {
-  var point;
-  int matrixWidth = int.parse(loadedImage.column);
-  int matrixHeight = int.parse(loadedImage.row);
-  for (var x = 0; x < matrixHeight; x++) {
-    double dx = x * (drawHeight/matrixHeight);
-    for (var y = 0; y < matrixWidth; y++) {
-      double dy = y * (drawWidth/matrixWidth);
-      if (layer == loadedImage.matrix[x][y].value) {
-        point = Offset(dy, dx);
-        canvas.drawPoints(PointMode.points, [point], Paint()
-          ..color = colorInput
-          ..strokeWidth = strokeSize
-          ..strokeCap = StrokeCap.round);
-      }
-    }
-  }
 }

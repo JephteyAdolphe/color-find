@@ -153,6 +153,7 @@ class _MenuState extends State<Menu> {
               radius: 400,
               onTap: () {
                 // Go to page
+                globals.fetchFileData(globals.imageID);
                 globals.clear();
                 Navigator.pop(context);
               },
