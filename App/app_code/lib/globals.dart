@@ -209,7 +209,7 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
       continue;
     double dx = x * (drawHeight / matrixHeight);
     for (var y = 0; y < matrixWidth; y++) {
-      if (y%2 == 0)
+      if (y+x%2 == 0)
         continue;
       double dy = y * (drawWidth / matrixWidth);
       if (layer == loadedImage.matrix[x][y].value) {
