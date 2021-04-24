@@ -15,6 +15,7 @@ bool lastNull = false; // check if one null has been inserted -> reducing load
 Color selectedColor; //color selected for current section
 bool dummyMode = false; // using dummyLayering
 bool debugMode = true;
+bool deleteLock = false;
 
 int getLayer(
     targetWidth, targetHeight, fillLayer, oldPositionDX, oldPositionDY) {
@@ -37,8 +38,8 @@ int getLayer(
       fillLayer == -2) {
     var dxScale = matrixWidth / globals.drawWidth;
     var dyScale = matrixHeight / globals.drawHeight;
-    var temp0 = double.parse(globals.loadedImage.column)/100;
-    var temp1 = temp0.toInt() * dxScale * dyScale;
+    var temp0 = 4;
+    var temp1 = temp0.toInt();// * dxScale * dyScale;
     if (temp1 < 1)
       temp1 = 1;
     var tempDot = temp1.toInt() * temp1.toInt();
@@ -370,12 +371,12 @@ class MyPainter extends CustomPainter {
         }
       }
       for (int i = 0; i < globals.layerFill.length; i++) {
-        if (!globals.layerFillOld[i] && globals.layerFill[i]) {
+        if (/*!globals.layerFillOld[i] && */globals.layerFill[i]) {
           //clean up
           globals.layerFillOld[i] = true;
           for (int x = 0; x < points.length; x++) {
-            points.removeWhere((item) => item.layer == i);
-            globals.records.removeWhere((item) => item.layer == i);
+            points.removeWhere((item) => item != null ? item.layer == i : false);
+            globals.records.removeWhere((item) => item != null ? item.layer == i : false);
           }
         }
       }
