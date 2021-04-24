@@ -1,4 +1,8 @@
 ball.jpg
 dog.png
-mario.png
-sonic.png
+dino.png
+chili.png
+otter.png
+dogtwo.png
+dogthree.jpg
+penguin.png

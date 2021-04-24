@@ -3,8 +3,8 @@ import time
 import matplotlib.pyplot as plt
 import os
 from PIL import Image, ImageFilter
-import mysql.connector
-from mysql.connector import errorcode
+#import mysql.connector
+#from mysql.connector import errorcode
 import cv2
 from sklearn.cluster import MiniBatchKMeans
 
@@ -392,7 +392,7 @@ class Algorithm_v2:
         self.export()
 
     def purgeSaved(self) -> None:  # Clear files
-        db = mysql.connector.connect(host="localhost", user="root", password="password", database="colorfind")
+ #       db = mysql.connector.connect(host="localhost", user="root", password="password", database="colorfind")
         directory = "./exports/" + str(self.__id)
         if os.path.isdir(directory):
             if os.path.isfile(directory + "/title.txt"):
@@ -408,11 +408,11 @@ class Algorithm_v2:
             if os.path.isfile(directory + "/numLayer.txt"):
                 os.remove(directory + "/numLayer.txt")
 
-            cursor = db.cursor()
-            sql = f"delete from picture where id = {self.__id + 1}"
-            cursor.execute(sql)
-            db.commit()
-            db.close()
+#            cursor = db.cursor()
+#            sql = f"delete from picture where id = {self.__id + 1}"
+#            cursor.execute(sql)
+#            db.commit()
+#            db.close()
 
     def export(self) -> None:  # Export files and create directory
         directory = "./exports/" + str(self.__id)
@@ -429,13 +429,13 @@ class Algorithm_v2:
         self.saveidColorMapTxt()
         self.saveNumLayerTxt()
 
-        db = mysql.connector.connect(host="localhost", user="root", password="password", database="colorfind")
-        cursor = db.cursor()
+#        db = mysql.connector.connect(host="localhost", user="root", password="password", database="colorfind")
+#        cursor = db.cursor()
 
         targetFile = f"./exports/{self.__id}"
 
-        sql = "insert into picture (id, col, roes, num_layer, color_map, layer_matrix, name) VALUES (%s, %s, %s," \
-              "%s, %s, %s, %s)"
+#        sql = "insert into picture (id, col, roes, num_layer, color_map, layer_matrix, name) VALUES (%s, %s, %s," \
+#              "%s, %s, %s, %s)"
 
         column_file = open(f"{targetFile}/column.txt", "r")
         column = column_file.readlines()
@@ -454,18 +454,18 @@ class Algorithm_v2:
             db.close()
             raise Exception
 
-        vals = (self.__id + 1, int(column[0]), int(row[0]), int(numLayer[0]), colorMap, layerMatrix, title[0])
+#        vals = (self.__id + 1, int(column[0]), int(row[0]), int(numLayer[0]), colorMap, layerMatrix, title[0])
 
-        column_file.close()
-        row_file.close()
-        numLayer_file.close()
-        colorMap_file.close()
-        layerMatrix_file.close()
-        title_file.close()
-        cursor.execute(sql, vals)
-        db.commit()
+#        column_file.close()
+#        row_file.close()
+#        numLayer_file.close()
+#        colorMap_file.close()
+#        layerMatrix_file.close()
+#        title_file.close()
+#        cursor.execute(sql, vals)
+#        db.commit()
 
-        db.close()
+#        db.close()
 
 
 
@@ -543,7 +543,10 @@ def normalRun(Algorithm, itemUpdate = True, BW_enable = True, kmeansDefault = 5,
     with open("kvalues.txt", "r") as f:
         for line in f:
             temp = line.strip().split(",")
-            kvalues[temp[0]] = temp[1]
+            try:
+                kvalues[temp[0]] = temp[1]
+            except IndexError:
+                print("tried to input kvalue (didn't work): "+temp)
     print("kvalues List:", kvalues)
 
     # Target size
@@ -582,7 +585,7 @@ def normalRun(Algorithm, itemUpdate = True, BW_enable = True, kmeansDefault = 5,
             temp = Algorithm("./Images/"+target, tempInt, int(sizes[0]), int(sizes[1]), ktemp, BW_enable)
             temp.updateExport()
             if imageShow:
-                fig.add_subplot(rows,1,imgNum)
+                #fig.add_subplot(rows,1,imgNum)
                 plt.imshow(temp.idToRGB())
                 plt.show()
         elif not itemExists: # Only new images get exported
@@ -595,7 +598,7 @@ def normalRun(Algorithm, itemUpdate = True, BW_enable = True, kmeansDefault = 5,
             temp = Algorithm("./Images/"+target, tempInt, int(sizes[0]), int(sizes[1]), ktemp, BW_enable)
             temp.updateExport()
             if imageShow:
-                fig.add_subplot(rows,1,imgNum)
+                #fig.add_subplot(rows,1,imgNum)
                 plt.imshow(temp.idToRGB())
                 plt.show()
         timeSpent = time.time()-startTime
@@ -633,7 +636,7 @@ ball.updateExport()
 plt.imshow(ball.idToRGB())
 plt.show()
 '''
-# normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = False)
+normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = True)
 '''
 trialx = 25
 results1 = results_of_algorithm(Algorithm_v1_old,   trials= trialx)
@@ -647,5 +650,5 @@ for target in results1:
 print("Average Time per Algorithm for each image:")
 print(summaryTable)
 '''
-test = Algorithm_v2("ball.jpg", 4)
-test.updateExport()
+# test = Algorithm_v2("ball.jpg", 4)
+# test.updateExport()

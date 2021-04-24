@@ -255,7 +255,19 @@ class FormScreenState extends State<FormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Survey Form")),
+      appBar: AppBar(
+        backgroundColor: Color(0xFFB388FF),
+        centerTitle: true,
+        title: const Text(
+          'Survey Form',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            fontFamily: 'BalooBhai',
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.all(24),
