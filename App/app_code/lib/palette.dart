@@ -97,6 +97,106 @@ Widget getPalette(BuildContext context) {
                       (Set<MaterialState> states) {
                     return Colors.pink;
                   }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.redAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.redAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.deepOrange;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.deepOrange;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.deepOrangeAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.deepOrangeAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.amber;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.amber;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.limeAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.limeAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.lightGreenAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.lightGreenAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.cyanAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.cyanAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.indigoAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.indigoAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.deepPurpleAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.deepPurpleAccent;
+                  }))),
+          ElevatedButton(
+              onPressed: () {
+                globals.activeColor = Colors.purpleAccent;
+              },
+              child: null,
+              style: ButtonStyle(backgroundColor:
+              MaterialStateProperty.resolveWith<Color>(
+                      (Set<MaterialState> states) {
+                    return Colors.purpleAccent;
+                  }))),
         ],
       ));
 }
