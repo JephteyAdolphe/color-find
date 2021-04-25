@@ -7,6 +7,7 @@ from PIL import Image, ImageFilter
 #from mysql.connector import errorcode
 import cv2
 from sklearn.cluster import MiniBatchKMeans
+import pymysql
 
 
 # Algo v2 with layering that is seperated even if color is similar. includes kmeans (Est T(kmean + 3*idArr + 4*idMap))
@@ -450,9 +451,9 @@ class Algorithm_v2:
         title_file = open(f"{targetFile}/title.txt", "r")
         title = title_file.readlines()
 
-        if ";" in title[0] or "drop" in title[0]:
-            db.close()
-            raise Exception
+        # if ";" in title[0] or "drop" in title[0]:
+        #     db.close()
+        #     raise Exception
 
 #        vals = (self.__id + 1, int(column[0]), int(row[0]), int(numLayer[0]), colorMap, layerMatrix, title[0])
 
@@ -636,7 +637,7 @@ ball.updateExport()
 plt.imshow(ball.idToRGB())
 plt.show()
 '''
-normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = True)
+# normalRun(Algorithm_v2, itemUpdate = True, BW_enable = True, kmeansDefault = 5, imageShow = True)
 '''
 trialx = 25
 results1 = results_of_algorithm(Algorithm_v1_old,   trials= trialx)
@@ -652,3 +653,22 @@ print(summaryTable)
 '''
 # test = Algorithm_v2("ball.jpg", 4)
 # test.updateExport()
+
+def awsTest():
+    db = pymysql.connect(host='color-find.cfwn8bjom41h.us-east-2.rds.amazonaws.com',
+        user='admin',
+        password='password',
+        db='dbname',
+        charset='utf8mb4')
+
+    cursor = db.cursor()
+    use = "use color_find"
+    cursor.execute(use)
+    sql = "describe layering_data"
+    cursor.execute(sql)
+    foo = cursor.fetchall()
+    print(foo)
+
+
+print("hello")
+awsTest()
