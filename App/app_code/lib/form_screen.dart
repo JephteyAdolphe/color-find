@@ -57,7 +57,14 @@ class FormScreenState extends State<FormScreen> {
 
   Widget _buildQuestionOne() {
     return TextFormField(
+      keyboardType: TextInputType.numberWithOptions(
+        signed: false,
+        decimal: false,
+      ),
+      maxLines:2,
       decoration: InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          contentPadding: EdgeInsets.only(top: 48),
           labelText:
               'How would you rate your ColorFind experience?',
           helperText:
@@ -78,8 +85,14 @@ class FormScreenState extends State<FormScreen> {
 
   Widget _buildQuestionTwo() {
     return TextFormField(
+      keyboardType: TextInputType.numberWithOptions(
+        signed: false,
+        decimal: false,
+      ),
       maxLines: 2,
       decoration: InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          contentPadding: EdgeInsets.only(top: 48),
           labelText:
           'Before your ColorFind session, how would you\nrate your stress levels?',
           helperText:
@@ -100,8 +113,14 @@ class FormScreenState extends State<FormScreen> {
 
   Widget _buildQuestionThree() {
     return TextFormField(
+      keyboardType: TextInputType.numberWithOptions(
+        signed: false,
+        decimal: false,
+      ),
       maxLines:2,
       decoration: InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          contentPadding: EdgeInsets.only(top: 48),
           labelText:
           'After your ColorFind session, how would you\nrate your stress levels?',
           helperText:
@@ -122,7 +141,10 @@ class FormScreenState extends State<FormScreen> {
 
   Widget _buildQuestionFour() {
     return TextFormField(
+      maxLines:2,
       decoration: InputDecoration(
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          contentPadding: EdgeInsets.only(top: 48),
           labelText:
           'How can we improve?',
           helperText:
