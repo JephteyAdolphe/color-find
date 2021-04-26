@@ -7,6 +7,8 @@ import 'package:app_code/palette.dart';
 import 'menu.dart';
 import 'globals.dart' as globals;
 
+//test commit
+
 int selectedLayer = -1; // which layer is selected
 int tempLayer = -1; // new layer to compare.
 int oldDY = -1; // old point no repeats -> reducing load
