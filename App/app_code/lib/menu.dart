@@ -179,14 +179,14 @@ class _MenuState extends State<Menu> {
                 horizontal: 36.0, vertical: 16),
             child: InkResponse(
               radius: 400,
-              onTap: () {
+              onTap: () async {
                 // Go to page
-                globals.saveImage();
+                String temp = await globals.saveImage();
                 showDialog(
                   context: context,
                   builder: (context) => new AlertDialog(
                     title: new Text('Save'),
-                    content: Text('Saved, Check for Files in /ColorFind'),
+                    content: Text('Saved, Check for Files in $temp'),
                     actions: <Widget>[
                       new FlatButton(
                         onPressed: () {

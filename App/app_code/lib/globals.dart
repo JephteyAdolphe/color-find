@@ -232,7 +232,7 @@ Future<String> getStorageDirectory() async {
   }
 }
 
-void saveImage({clearRecords = false}) async {
+Future<String> saveImage({clearRecords = false}) async {
   var imgPermission = await Permission.storage.status;
   if (imgPermission.isUndetermined) {
     print("");
@@ -244,7 +244,7 @@ void saveImage({clearRecords = false}) async {
     var requestPermission = await Permission.storage.request();
     if (requestPermission == PermissionStatus.denied) {
       print("permission needed");
-      return; //Terminate early if no permission was granted.
+      return "permission needed"; //Terminate early if no permission was granted.
     }
     print("permission obtained");
   }
@@ -322,6 +322,7 @@ void saveImage({clearRecords = false}) async {
   if (clearRecords) {
     clear();
   }
+  return myImagePath + '/' + imageName;
 }
 
 Future<void> writeToFile(ByteData data, String path) {
