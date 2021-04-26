@@ -186,7 +186,7 @@ class _MenuState extends State<Menu> {
                   context: context,
                   builder: (context) => new AlertDialog(
                     title: new Text('Save'),
-                    content: Text('Saved, Check Android: data/com.exapmle.app_code/Files/ColorFind'),
+                    content: Text('Saved, Check for Files in /ColorFind'),
                     actions: <Widget>[
                       new FlatButton(
                         onPressed: () {

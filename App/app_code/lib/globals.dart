@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:typed_data';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -189,28 +189,15 @@ void fetchFileData(String id) async {
   imageLoaded = true;
 }
 
-// Saving images
-Future<String> getStorageDirectory() async {
-  if (Platform.isAndroid) {
-    return (await getExternalStorageDirectory())
-        .path; // OR return "/storage/emulated/0/Download"; "storage/emulated/0/Pictures";//
-  } else {
-    return (await getApplicationDocumentsDirectory()).path; // Iphone
-  }
-}
-
-
 void fillLayer(Canvas canvas, int layer, Color colorInput) {
   var point;
   int matrixWidth = int.parse(loadedImage.column);
   int matrixHeight = int.parse(loadedImage.row);
   for (var x = 0; x < matrixHeight; x++) {
-    if (x%2 == 0)
-      continue;
+    if (x % 2 == 0) continue;
     double dx = x * (drawHeight / matrixHeight);
     for (var y = 0; y < matrixWidth; y++) {
-      if (y+x%2 == 0)
-        continue;
+      if (y + x % 2 == 0) continue;
       double dy = y * (drawWidth / matrixWidth);
       if (layer == loadedImage.matrix[x][y].value) {
         point = Offset(dy, dx);
@@ -227,10 +214,38 @@ void fillLayer(Canvas canvas, int layer, Color colorInput) {
   }
 }
 
+// Saving images
+Future<String> getStorageDirectory() async {
+  if (io.Platform.isAndroid) {
+    var dirTemp = (await getExternalStorageDirectory())
+        .path; // OR return "/storage/emulated/0/Download"; "storage/emulated/0/Pictures";//
+    String topDir = "";
+    List<String> dirTemp2 = dirTemp.split("/");
+    for (int i = 1; i < dirTemp2.length; i++)
+      if (dirTemp2[i] != "Android")
+        topDir += "/" + dirTemp2[i]; // avoid temp storage
+      else
+        break;
+    return topDir;
+  } else {
+    return (await getApplicationDocumentsDirectory()).path; // Iphone
+  }
+}
+
 void saveImage({clearRecords = false}) async {
   var imgPermission = await Permission.storage.status;
   if (imgPermission.isUndetermined) {
     print("");
+  }
+  //get permission
+  if (await (Permission.storage.isGranted))
+    print("permission granted");
+  else {
+    var requestPermission = await Permission.storage.request();
+    if (requestPermission == PermissionStatus.denied) {
+      return; //Terminate early if no permission was granted.
+    }
+    print("permission obtained");
   }
 
   // You can can also directly ask the permission about its status.
@@ -241,7 +256,7 @@ void saveImage({clearRecords = false}) async {
   final directory = await getStorageDirectory();
   final myImagePath = '$directory' + '/ColorFind';
   print('$myImagePath');
-  final myImgDir = await new Directory(myImagePath).create();
+  final myImgDir = await new io.Directory(myImagePath).create();
 
   print(myImagePath);
 
@@ -256,12 +271,8 @@ void saveImage({clearRecords = false}) async {
     for (int i = 0; i < layerFill.length; i++) {
       if (layerFill[i]) {
         // Fill Layer
-        fillLayer(
-            canvas,
-            i,
-            selectedColors[i] != null
-                ? selectedColors[i]
-                : Colors.black);
+        fillLayer(canvas, i,
+            selectedColors[i] != null ? selectedColors[i] : Colors.black);
       }
     }
   }
@@ -283,8 +294,25 @@ void saveImage({clearRecords = false}) async {
 
   print('Image saving');
   //save image
+  String imageName = imageID+loadedImage.title;
+  int imgMax = 25;
+  for(int i = 0; i < imgMax; i++)
+  {//allow saving of image multiple times
+    if(await io.File(myImagePath + '/' + imageName + "#$i.png").exists())
+      continue;
+    else
+      {
+        imageName += "#$i.png";
+        break;
+      }
+    if(i == 24)
+      {
+        imageName += "#Temp.png";
+        break;
+      }
+  }
   writeToFile(
-      pngBytes, myImagePath + '/imgtest.png'); //needs to be dynamic saving.
+      pngBytes, myImagePath + '/' + imageName); //needs to be dynamic saving.
 
   print('image Saved');
 
@@ -297,6 +325,6 @@ void saveImage({clearRecords = false}) async {
 
 Future<void> writeToFile(ByteData data, String path) {
   final buffer = data.buffer;
-  return new File(path)
+  return new io.File(path)
       .writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
 }
