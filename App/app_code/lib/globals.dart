@@ -243,6 +243,7 @@ void saveImage({clearRecords = false}) async {
   else {
     var requestPermission = await Permission.storage.request();
     if (requestPermission == PermissionStatus.denied) {
+      print("permission needed");
       return; //Terminate early if no permission was granted.
     }
     print("permission obtained");
