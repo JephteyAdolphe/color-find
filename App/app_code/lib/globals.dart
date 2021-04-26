@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 //import directives: Pavan
 import 'dart:async' show Future;
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
 
 //
 String imageID = "-1";
@@ -31,6 +32,12 @@ var layerBool; //Truth matrix of the picture
 var layerAmountMax; //check for amount of pixels per layer
 var layerAmountMaxScaled; //scaled to screen size
 var layerAmountFilled; //check for amount of pixels filled per layer
+
+//ensures black layers are filled in at end
+var blackLayer = [];
+
+//show outline functionality
+int showOutline = 0;
 
 // screen sizing
 var screenW; // Total screen width
@@ -143,6 +150,53 @@ void fetchFileData(String id) async {
   readRow = await rootBundle.loadString('assets/' + id + '/row.txt');
   readColumn = await rootBundle.loadString('assets/' + id + '/column.txt');
   readTitle = await rootBundle.loadString('assets/' + id + '/title.txt');
+
+  //find black layers
+  LineSplitter ls = new LineSplitter();
+  List<String> lines = ls.convert(readColorMap);
+  List<String> threeNumbers;
+
+  int currentLineTally = 0;
+  int smallestLineTally = 1000; //supposed to be INF
+  for (int i = 0; i < lines.length; i++) {
+    threeNumbers = lines[i].split(',');
+    for (int j = 0; j < threeNumbers.length; j++) {
+      currentLineTally = currentLineTally + int.parse(threeNumbers[j]);
+    }
+    if (currentLineTally < smallestLineTally) {
+      smallestLineTally = currentLineTally;
+    }
+    currentLineTally = 0;
+  }
+  int sum = 0;
+  for (int i = 0; i < lines.length; i++) {
+    threeNumbers = lines[i].split(',');
+    for (int j = 0; j < threeNumbers.length; j++) {
+      sum = sum + int.parse(threeNumbers[j]);
+    }
+    if (sum == smallestLineTally) {
+      blackLayer.add(i);
+    }
+    sum = 0;
+  }
+
+  //outdated:
+  /*
+  int counter=0;
+  for (int i = 0; i < lines.length; i++) {
+    threeNumbers = lines[i].split(',');
+    for (int j = 0; j < threeNumbers.length; j++) {
+      if (int.parse(threeNumbers[j]) < 56) {
+        counter = counter + 1;
+        if (counter == 3) {
+          blackLayer.add(i);
+          counter = 0;
+        }
+      }
+    }
+  }
+   */
+  //end: find black layers
 
   selectedColors = List<Color>.filled(int.parse(readNumLayer), null);
   layerFill = List<bool>.filled(int.parse(readNumLayer), false);

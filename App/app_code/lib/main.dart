@@ -209,7 +209,16 @@ class _DrawingBlockState extends State<DrawingBlock>
               dummyMode = true;
               globals.fillPermission = 0;
             }
+            //for allowing filling of autofilled layers
+            //-1 means out of bounds of the layer/canvas
+            //if the selected layer is within bounds
+            //and if it is not within blackLayers
+            //and you do not have permission to fill
+            //or you do have permission to fill and it is not a valid layer
+            //then
             if (selectedLayer != -1 &&
+                !globals.blackLayer.contains(selectedLayer) && //if a layer is
+                //in blackLayers then do not proceed
                 (globals.fillPermission ==
                         0 //if it already filled, do not add more points
                     ? true
@@ -359,6 +368,20 @@ class MyPainter extends CustomPainter {
             1.75) {
           //condition check to fill layer
           globals.layerFill[i] = true;
+          //auto-fill black layers to black after all other layers have been filled
+          var tempCounter = 0;
+          for (int x = 0; x < globals.layerFill.length; x++) {
+            //count number of trues in layerFill
+            if (globals.layerFill[x] == true)
+              tempCounter = tempCounter + 1;
+            if (tempCounter == (int.parse(globals.loadedImage.numLayer) - globals.blackLayer.length)) {
+              //if counter = numLayers - blackLayers then set all layer to be filled
+              for (int y = 0; y < globals.layerFill.length; y++) {
+                globals.layerFill[y] = true;
+              }
+              break; //finish
+            }
+          }
         }
         if (globals.layerFill[i]) {
           // Fill Layer
@@ -380,6 +403,17 @@ class MyPainter extends CustomPainter {
           }
         }
       }
+    }
+
+    //show outline functionality
+    if (globals.showOutline == 1) {
+      for (int x = 0; x < globals.blackLayer.length; x++) {
+        globals.fillLayer(
+            canvas,
+            globals.blackLayer[x],
+            Colors.black);
+      }
+      globals.showOutline = 0;
     }
 
     for (int x = 0; x < points.length - 1; x++) {
