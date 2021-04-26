@@ -1,5 +1,5 @@
 ball.jpg
-dog.png
+rainbow.png
 dino.png
 chili.png
 otter.png

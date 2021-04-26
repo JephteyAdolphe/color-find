@@ -260,6 +260,8 @@ class _MenuState extends State<Menu> {
             child: InkResponse(
               radius: 400,
               onTap: () {
+                globals.showOutline = 1;
+                /*
                 // Go to page
                 showDialog(
                   context: context,
@@ -277,6 +279,7 @@ class _MenuState extends State<Menu> {
                     ],
                   ),
                 );
+                */
               },
               child: Text(
                 _menuTitles[i],
