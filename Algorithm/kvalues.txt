@@ -1,5 +1,5 @@
 ball.jpg,3
-dog.png,5
+rainbow.png,7
 dino.png,4
 chili.png,4
 otter.png,5
