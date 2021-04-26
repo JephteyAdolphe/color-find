@@ -67,6 +67,8 @@ void printCanvasSize() {
   print(loadedImage.row);
   print(layerFill);
   print(layerFillOld);
+  print(blackLayer);
+  print(loadedImage.numLayer);
 }
 
 List<double> getCanvasSize() {
@@ -152,6 +154,7 @@ void fetchFileData(String id) async {
   readTitle = await rootBundle.loadString('assets/' + id + '/title.txt');
 
   //find black layers
+  blackLayer = [];
   LineSplitter ls = new LineSplitter();
   List<String> lines = ls.convert(readColorMap);
   List<String> threeNumbers;

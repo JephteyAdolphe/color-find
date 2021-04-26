@@ -33,36 +33,40 @@ int getLayer(
     // if it is bigger or negative then matrix size return -1 for null
     return -1;
   }
+  var targetLayer =
+      globals.loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()].value;
   // counts if specific spot hasn't been visited before
-  if (fillLayer ==
-          globals.loadedImage.matrix[selectedDY.toInt()][selectedDX.toInt()]
-              .value ||
+  if (fillLayer == targetLayer && !globals.blackLayer.contains(fillLayer) ||
       fillLayer == -2) {
     var dxScale = matrixWidth / globals.drawWidth;
     var dyScale = matrixHeight / globals.drawHeight;
     var temp0 = 4;
-    var temp1 = temp0.toInt();// * dxScale * dyScale;
-    if (temp1 < 1)
-      temp1 = 1;
+    var temp1 = temp0.toInt(); // * dxScale * dyScale;
+    if (temp1 < 1) temp1 = 1;
     var tempDot = temp1.toInt() * temp1.toInt();
-    if (true || !globals.layerBool[selectedDY.toInt()][selectedDX.toInt()]) {
+    if (true &&
+        !globals.blackLayer.contains(targetLayer) &&
+        !globals.blackLayer.contains(
+            fillLayer)) //if a layer is in blackLayers then do not add points)
+    {
       globals.layerBool[selectedDY.toInt()][selectedDX.toInt()] = true;
       globals.layerAmountFilled[globals
           .loadedImage
           .matrix[selectedDY.toInt()][selectedDX.toInt()]
-          .value] += tempDot.toInt();
+          .value] += tempDot.toInt(); // add points on dot
       if (oldPositionDX != null) {
         var old2DY = oldPositionDY * (matrixHeight / globals.drawHeight);
         var old2DX = oldPositionDX * (matrixWidth / globals.drawWidth);
-        var dist = 0.5*sqrt((old2DY - selectedDY) * (old2DY - selectedDY) +
-            (old2DX - selectedDX) * (old2DX - selectedDX));
-        if (dist < 1)
-          dist = 1;
-        globals.layerAmountFilled[globals
-            .loadedImage
-            .matrix[selectedDY.toInt()][selectedDX.toInt()]
-            .value] += dist.toInt() * temp1.toInt();
+        var dist = 0.5 *
+            sqrt((old2DY - selectedDY) * (old2DY - selectedDY) +
+                (old2DX - selectedDX) * (old2DX - selectedDX));
+        if (dist < 1) dist = 1;
+        globals.layerAmountFilled[globals.loadedImage
+                .matrix[selectedDY.toInt()][selectedDX.toInt()].value] +=
+            dist.toInt() *
+                temp1.toInt(); //add points via distance and size of point
         if (debugMode) {
+          //debug
           print("testx:");
           print(selectedDX);
           print(selectedDY);
@@ -73,6 +77,7 @@ int getLayer(
         }
       } else {
         if (debugMode) {
+          //debug
           print("testx:");
           print(selectedDX);
           print(selectedDY);
@@ -321,14 +326,14 @@ class _DrawingBlockState extends State<DrawingBlock>
           children: <Widget>[
             //borderRadius: BorderRadius.all(Radius.circular(20)),
             //AnimatedBuilder(
-              //animation: _controller,
-              //builder: (_, __) {
-                CustomPaint(
-                  painter: MyPainter(
-                    points: globals.records,
-                  ),
-                ),
-              //},
+            //animation: _controller,
+            //builder: (_, __) {
+            CustomPaint(
+              painter: MyPainter(
+                points: globals.records,
+              ),
+            ),
+            //},
             //),
             Row(
               children: [
@@ -366,17 +371,19 @@ class MyPainter extends CustomPainter {
     //testing fillLayer function
     if (globals.fillPermission == 1) {
       for (int i = 0; i < globals.layerFill.length; i++) {
-        if (!globals.layerFill[i] && globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] >
-            1.75) {
+        if (!globals.layerFill[i] &&
+            globals.layerAmountFilled[i] / globals.layerAmountMaxScaled[i] >
+                1.75) {
           //condition check to fill layer
           globals.layerFill[i] = true;
           //auto-fill black layers to black after all other layers have been filled
           var tempCounter = 0;
           for (int x = 0; x < globals.layerFill.length; x++) {
             //count number of trues in layerFill
-            if (globals.layerFill[x] == true)
-              tempCounter = tempCounter + 1;
-            if (tempCounter == (int.parse(globals.loadedImage.numLayer) - globals.blackLayer.length)) {
+            if (globals.layerFill[x] == true) tempCounter = tempCounter + 1;
+            if (tempCounter ==
+                (int.parse(globals.loadedImage.numLayer) -
+                    globals.blackLayer.length)) {
               //if counter = numLayers - blackLayers then set all layer to be filled
               for (int y = 0; y < globals.layerFill.length; y++) {
                 globals.layerFill[y] = true;
@@ -396,12 +403,14 @@ class MyPainter extends CustomPainter {
         }
       }
       for (int i = 0; i < globals.layerFill.length; i++) {
-        if (/*!globals.layerFillOld[i] && */globals.layerFill[i]) {
+        if (/*!globals.layerFillOld[i] && */ globals.layerFill[i]) {
           //clean up
           globals.layerFillOld[i] = true;
           for (int x = 0; x < points.length; x++) {
-            points.removeWhere((item) => item != null ? item.layer == i : false);
-            globals.records.removeWhere((item) => item != null ? item.layer == i : false);
+            points
+                .removeWhere((item) => item != null ? item.layer == i : false);
+            globals.records
+                .removeWhere((item) => item != null ? item.layer == i : false);
           }
         }
       }
@@ -410,10 +419,7 @@ class MyPainter extends CustomPainter {
     //show outline functionality
     if (globals.showOutline == 1) {
       for (int x = 0; x < globals.blackLayer.length; x++) {
-        globals.fillLayer(
-            canvas,
-            globals.blackLayer[x],
-            Colors.black);
+        globals.fillLayer(canvas, globals.blackLayer[x], Colors.black);
       }
       globals.showOutline = 0;
     }
