@@ -247,25 +247,80 @@ void fetchFileData(String id) async {
 }
 
 void fillLayer(Canvas canvas, int layer, Color colorInput) {
-  var point;
+  var point = null;
+  var pointEnd = null;
   int matrixWidth = int.parse(loadedImage.column);
   int matrixHeight = int.parse(loadedImage.row);
   for (var x = 0; x < matrixHeight; x++) {
+    // draw line or dot or skip for new lines
+    if (point == null) {
+      // skip
+    } else if (pointEnd == null) {
+      // dot
+      canvas.drawPoints(
+        PointMode.points,
+        [point],
+        Paint()
+          ..color = colorInput
+          ..strokeWidth = 4
+          ..strokeCap = StrokeCap.round,
+      );
+      point = null; // clear
+    } else {
+      // line
+      canvas.drawLine(
+        point,
+        pointEnd,
+        Paint()
+          ..color = colorInput
+          ..strokeWidth = 4
+          ..strokeCap = StrokeCap.round,
+      );
+      point = null; // clear
+      pointEnd = null; // clear
+    }
+    // start
     if (x % 2 == 0) continue;
     double dx = x * (drawHeight / matrixHeight);
     for (var y = 0; y < matrixWidth; y++) {
-      if (y + x % 2 == 0) continue;
+      //if (y + x % 2 == 0) continue;
       double dy = y * (drawWidth / matrixWidth);
       if (layer == loadedImage.matrix[x][y].value) {
-        point = Offset(dy, dx);
-        canvas.drawPoints(
-          PointMode.points,
-          [point],
-          Paint()
-            ..color = colorInput
-            ..strokeWidth = 4
-            ..strokeCap = StrokeCap.round,
-        );
+        if (point == null) {
+          //set first point
+          point = Offset(dy, dx);
+        } else {
+          pointEnd = Offset(dy, dx);
+        }
+      } else {
+        // draw line or dot or skip
+        if (point == null) {
+          // skip
+          continue;
+        } else if (pointEnd == null) {
+          // dot
+          canvas.drawPoints(
+            PointMode.points,
+            [point],
+            Paint()
+              ..color = colorInput
+              ..strokeWidth = 4
+              ..strokeCap = StrokeCap.round,
+          );
+          point = null; // clear
+        } else {
+          // line
+          canvas.drawLine(
+            point,
+            pointEnd,
+            Paint()
+              ..color = colorInput
+              ..strokeWidth = 4
+              ..strokeCap = StrokeCap.round,
+          );
+          point = null; // clear
+          pointEnd = null; // clear
+        }
       }
     }
   }
@@ -352,22 +407,20 @@ Future<String> saveImage({clearRecords = false}) async {
 
   print('Image saving');
   //save image
-  String imageName = imageID+loadedImage.title;
+  String imageName = imageID + loadedImage.title;
   int imgMax = 25;
-  for(int i = 0; i < imgMax; i++)
-  {//allow saving of image multiple times
-    if(await io.File(myImagePath + '/' + imageName + "#$i.png").exists())
+  for (int i = 0; i < imgMax; i++) {
+    //allow saving of image multiple times
+    if (await io.File(myImagePath + '/' + imageName + "#$i.png").exists())
       continue;
-    else
-      {
-        imageName += "#$i.png";
-        break;
-      }
-    if(i == 24)
-      {
-        imageName += "#Temp.png";
-        break;
-      }
+    else {
+      imageName += "#$i.png";
+      break;
+    }
+    if (i == 24) {
+      imageName += "#Temp.png";
+      break;
+    }
   }
   writeToFile(
       pngBytes, myImagePath + '/' + imageName); //needs to be dynamic saving.
